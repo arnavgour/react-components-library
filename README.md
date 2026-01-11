@@ -2,10 +2,19 @@
 
 A collection of beautifully crafted React components built with Tailwind CSS.
 
+📚 **[Documentation](https://www.argojun.in/)**
+
 ## Installation
 
 ```bash
+# npm
 npm install @argojun/react-components
+
+# yarn
+yarn add @argojun/react-components
+
+# pnpm
+pnpm add @argojun/react-components
 ```
 
 ## Usage
