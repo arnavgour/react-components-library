@@ -1,11 +1,11 @@
-# @arnavgour/react-components
+# @argojun/react-components
 
 A collection of beautifully crafted React components built with Tailwind CSS.
 
 ## Installation
 
 ```bash
-npm install @arnavgour/react-components
+npm install @argojun/react-components
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install @arnavgour/react-components
 Import components directly from the package:
 
 ```jsx
-import { Button, Input, Select, Checkbox, Radio, DateTimePicker, FileUpload, MultiSelect, Textarea, Icon } from '@arnavgour/react-components';
+import { Button, Input, Select, Checkbox, Radio, DateTimePicker, FileUpload, MultiSelect, Textarea, Icon } from '@argojun/react-components';
 ```
 
 ### Include Styles
@@ -21,7 +21,7 @@ import { Button, Input, Select, Checkbox, Radio, DateTimePicker, FileUpload, Mul
 Make sure to include the styles in your app:
 
 ```jsx
-import '@arnavgour/react-components/styles.css';
+import '@argojun/react-components/styles.css';
 ```
 
 Or if you're using Tailwind CSS, you can include the component paths in your `tailwind.config.js`:
@@ -30,7 +30,7 @@ Or if you're using Tailwind CSS, you can include the component paths in your `ta
 module.exports = {
   content: [
     // ... your paths
-    './node_modules/@arnavgour/react-components/dist/**/*.js',
+    './node_modules/@argojun/react-components/dist/**/*.js',
   ],
   // ...
 };
