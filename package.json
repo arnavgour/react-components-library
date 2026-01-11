@@ -1,0 +1,73 @@
+{
+  "name": "@arnavgour/react-components",
+  "version": "1.0.0",
+  "description": "A collection of beautifully crafted React components with Tailwind CSS",
+  "type": "module",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "tailwindcss",
+    "button",
+    "input",
+    "select",
+    "checkbox",
+    "radio",
+    "datepicker",
+    "file-upload"
+  ],
+  "author": "Arnav Gour",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arnavgour/react-components-library.git"
+  },
+  "homepage": "https://github.com/arnavgour/react-components-library#readme",
+  "bugs": {
+    "url": "https://github.com/arnavgour/react-components-library/issues"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
+  },
+  "dependencies": {
+    "prop-types": "^15.8.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-react": "^7.24.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.12.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-postcss": "^4.0.2",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1"
+  }
+}

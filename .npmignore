@@ -1,0 +1,17 @@
+# Source files (we only publish dist)
+src/
+
+# Config files
+rollup.config.js
+babel.config.js
+tailwind.config.js
+postcss.config.js
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+
+# Misc
+*.log
+.DS_Store

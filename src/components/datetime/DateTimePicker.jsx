@@ -1,0 +1,547 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import PropTypes from 'prop-types';
+import Icon from '../Icon';
+import { motion, AnimatePresence } from 'motion/react';
+
+// --- Date Helpers ---
+const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+const getDayOfWeek = (year, month, day) => new Date(year, month, day).getDay(); // 0 = Sun
+
+const formatDate = (date, type) => {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+
+    const pad = (n) => n.toString().padStart(2, '0');
+
+    // Simple custom formatters
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const day = d.getDate();
+    const month = d.getMonth();
+    const year = d.getFullYear();
+    const hours = d.getHours();
+    const minutes = d.getMinutes();
+
+    // Time formatting
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const h12 = hours % 12 || 12;
+    const timeStr = `${h12}:${pad(minutes)} ${ampm}`;
+
+    if (type === 'time') return timeStr;
+    if (type === 'date') return `${monthNames[month]} ${day}, ${year}`;
+    return `${monthNames[month]} ${day}, ${year} ${timeStr}`;
+};
+
+const isSameDay = (d1, d2) => {
+    if (!d1 || !d2) return false;
+    return d1.getDate() === d2.getDate() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getFullYear() === d2.getFullYear();
+};
+
+/**
+ * DateTimePicker Component
+ */
+const DateTimePicker = ({
+    value,
+    onChange,
+    type = 'date', // date, time, datetime
+    label,
+    helperText,
+    error,
+    placeholder = 'Select date...',
+    minDate,
+    maxDate,
+    disabled = false,
+    color = 'violet',
+    size = 'md',
+    variant = 'outlined', // outlined, filled
+    className = '',
+    fullWidth = false,
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+    const yearScrollRef = useRef(null);
+
+    // Internal state for the calendar view (even if value is null)
+    const initialViewDate = value ? new Date(value) : new Date();
+    const [viewDate, setViewDate] = useState(initialViewDate); // For navigating months
+    const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : null);
+
+    // 'days', 'months', 'years'
+    const [viewMode, setViewMode] = useState('days');
+
+    // Update internal state when props change
+    useEffect(() => {
+        if (value) {
+            const d = new Date(value);
+            setSelectedDate(d);
+            setViewDate(d);
+        } else {
+            setSelectedDate(null);
+        }
+    }, [value]);
+
+    // Close on click outside and reset view
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+                setTimeout(() => setViewMode('days'), 200); // Reset after animation
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Scroll to year when opening year view
+    useEffect(() => {
+        if (viewMode === 'years' && yearScrollRef.current) {
+            const el = yearScrollRef.current.querySelector('[data-selected-year="true"]');
+            if (el) {
+                el.scrollIntoView({ block: 'center', behavior: 'auto' });
+            }
+        }
+    }, [viewMode]);
+
+    // Color configs
+    const colors = {
+        violet: {
+            active: 'bg-violet-500 text-white',
+            hover: 'hover:bg-violet-50 dark:hover:bg-violet-900/30 text-slate-700 dark:text-slate-300',
+            text: 'text-violet-600 dark:text-violet-400',
+            today: 'text-violet-600 font-bold',
+            ring: 'focus:ring-violet-500/20',
+            border: 'focus:border-violet-500',
+            icon: 'text-violet-500'
+        },
+        blue: {
+            active: 'bg-blue-500 text-white',
+            hover: 'hover:bg-blue-50 dark:hover:bg-blue-900/30 text-slate-700 dark:text-slate-300',
+            text: 'text-blue-600 dark:text-blue-400',
+            today: 'text-blue-600 font-bold',
+            ring: 'focus:ring-blue-500/20',
+            border: 'focus:border-blue-500',
+            icon: 'text-blue-500'
+        },
+        emerald: {
+            active: 'bg-emerald-500 text-white',
+            hover: 'hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-slate-700 dark:text-slate-300',
+            text: 'text-emerald-600 dark:text-emerald-400',
+            today: 'text-emerald-600 font-bold',
+            ring: 'focus:ring-emerald-500/20',
+            border: 'focus:border-emerald-500',
+            icon: 'text-emerald-500'
+        },
+        rose: {
+            active: 'bg-rose-500 text-white',
+            hover: 'hover:bg-rose-50 dark:hover:bg-rose-900/30 text-slate-700 dark:text-slate-300',
+            text: 'text-rose-600 dark:text-rose-400',
+            today: 'text-rose-600 font-bold',
+            ring: 'focus:ring-rose-500/20',
+            border: 'focus:border-rose-500',
+            icon: 'text-rose-500'
+        },
+        amber: {
+            active: 'bg-amber-500 text-white',
+            hover: 'hover:bg-amber-50 dark:hover:bg-amber-900/30 text-slate-700 dark:text-slate-300',
+            text: 'text-amber-600 dark:text-amber-400',
+            today: 'text-amber-600 font-bold',
+            ring: 'focus:ring-amber-500/20',
+            border: 'focus:border-amber-500',
+            icon: 'text-amber-500'
+        },
+        black: {
+            active: 'bg-slate-900 text-white dark:bg-white dark:text-slate-900',
+            hover: 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300',
+            text: 'text-slate-900 dark:text-white',
+            today: 'text-slate-900 dark:text-white font-bold',
+            ring: 'focus:ring-slate-500/20',
+            border: 'focus:border-slate-900 dark:focus:border-slate-100',
+            icon: 'text-slate-900 dark:text-white'
+        },
+    }[color] || colors.violet;
+
+    // Handlers
+    const handleDateClick = (day) => {
+        const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
+
+        if (selectedDate && type !== 'date') {
+            newDate.setHours(selectedDate.getHours());
+            newDate.setMinutes(selectedDate.getMinutes());
+        } else if (!selectedDate) {
+            const now = new Date();
+            newDate.setHours(now.getHours());
+            newDate.setMinutes(now.getMinutes());
+        }
+
+        setSelectedDate(newDate);
+        onChange?.(newDate);
+
+        if (type === 'date') setIsOpen(false);
+    };
+
+    const handleMonthSelect = (monthIdx) => {
+        const newDate = new Date(viewDate.getFullYear(), monthIdx, 1);
+        setViewDate(newDate);
+        setViewMode('days');
+    };
+
+    const handleYearSelect = (year) => {
+        const newDate = new Date(year, viewDate.getMonth(), 1);
+        setViewDate(newDate);
+        setViewMode('months'); // Go to month selection after year
+    };
+
+    const handleTimeChange = (type, val) => {
+        const d = selectedDate ? new Date(selectedDate) : new Date();
+        const safeVal = isNaN(val) ? 0 : val;
+        if (type === 'hour') d.setHours(safeVal);
+        if (type === 'minute') d.setMinutes(safeVal);
+        setSelectedDate(d);
+        onChange?.(d);
+    };
+
+    const navigateMonth = (dir) => {
+        const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + dir, 1);
+        setViewDate(newDate);
+    };
+
+    // Calendar Grid Generation
+    const generateCalendar = () => {
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+
+        const firstDay = getDayOfWeek(year, month, 1);
+        const days = daysInMonth(year, month);
+        const prevMonthDays = daysInMonth(year, month - 1);
+
+        const grid = [];
+
+        // Previous month filler
+        for (let i = 0; i < firstDay; i++) {
+            grid.push({ day: prevMonthDays - firstDay + 1 + i, type: 'prev' });
+        }
+
+        // Current month
+        for (let i = 1; i <= days; i++) {
+            grid.push({ day: i, type: 'current' });
+        }
+
+        // Next month filler
+        const remaining = 42 - grid.length; // 6 rows * 7 cols
+        for (let i = 1; i <= remaining; i++) {
+            grid.push({ day: i, type: 'next' });
+        }
+
+        return grid;
+    };
+
+    const calendarGrid = useMemo(() => generateCalendar(), [viewDate]);
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+    // Generate years (1900 - 2100)
+    const years = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        const yrs = [];
+        for (let i = 1900; i <= currentYear + 100; i++) {
+            yrs.push(i);
+        }
+        return yrs;
+    }, []);
+
+    // Styles based on variant/size
+    const inputClasses = `
+        w-full flex items-center justify-between transition-all duration-200 cursor-pointer
+        ${size === 'sm' ? 'px-3 py-2 text-sm' : ''}
+        ${size === 'md' ? 'px-4 py-2.5 text-sm' : ''}
+        ${size === 'lg' ? 'px-5 py-3 text-base' : ''}
+        ${variant === 'outlined'
+            ? 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+            : 'bg-slate-50 dark:bg-slate-800/50 border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800'
+        }
+        ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : `${isOpen ? colors.border : ''} focus:ring-4 ${colors.ring}`}
+        ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-900' : 'hover:shadow-sm'}
+        rounded-xl outline-none
+    `;
+
+    return (
+        <div
+            className={`relative ${fullWidth ? 'w-full' : 'w-72'} ${className}`}
+            ref={containerRef}
+        >
+            {/* Label */}
+            {label && (
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 ml-1">
+                    {label}
+                </label>
+            )}
+
+            {/* Trigger Input */}
+            <div
+                className={inputClasses}
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+                role="button"
+                tabIndex={0}
+            >
+                <div className="flex items-center gap-3 overflow-hidden">
+                    <Icon
+                        icon={type === 'time' ? 'clock' : 'calendar-days'}
+                        variant="far"
+                        className={`${selectedDate ? colors.icon : 'text-slate-400'} flex-shrink-0`}
+                    />
+                    <span className={`block truncate ${selectedDate ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+                        {selectedDate ? formatDate(selectedDate, type) : placeholder}
+                    </span>
+                </div>
+                {!disabled && (
+                    <Icon
+                        icon="chevron-down"
+                        variant="fas"
+                        className={`text-slate-400 text-xs transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                )}
+            </div>
+
+            {/* Error & Helper Text */}
+            {(error || helperText) && (
+                <div className="mt-1.5 ml-1 text-xs">
+                    {error ? (
+                        <span className="text-red-500 flex items-center gap-1">
+                            <Icon icon="circle-exclamation" variant="fas" />
+                            {error}
+                        </span>
+                    ) : (
+                        <span className="text-slate-500 dark:text-slate-400">{helperText}</span>
+                    )}
+                </div>
+            )}
+
+            {/* Popover */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full left-0 mt-2 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden min-w-[320px] w-fit"
+                    >
+
+
+                        <div className="flex flex-col sm:flex-row">
+                            {/* Views Container */}
+                            {type !== 'time' && (
+                                <div className="text-sm flex-1 min-w-[320px]">
+                                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
+                                        {viewMode === 'days' && (
+                                            <>
+                                                <button
+                                                    onClick={() => navigateMonth(-1)}
+                                                    className="p-1.5 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-700 text-slate-500 transition-colors"
+                                                >
+                                                    <Icon icon="chevron-left" variant="fas" className="text-xs" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setViewMode('years')}
+                                                    className={`font-semibold text-sm ${colors.text} hover:opacity-80 transition-opacity`}
+                                                >
+                                                    {months[viewDate.getMonth()]} {viewDate.getFullYear()}
+                                                </button>
+                                                <button
+                                                    onClick={() => navigateMonth(1)}
+                                                    className="p-1.5 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-700 text-slate-500 transition-colors"
+                                                >
+                                                    <Icon icon="chevron-right" variant="fas" className="text-xs" />
+                                                </button>
+                                            </>
+                                        )}
+                                        {(viewMode === 'months' || viewMode === 'years') && (
+                                            <div className="flex items-center justify-center w-full relative">
+                                                <button
+                                                    onClick={() => setViewMode(viewMode === 'years' ? 'days' : 'years')}
+                                                    className="absolute left-0 p-1.5 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-700 text-slate-500"
+                                                >
+                                                    <Icon icon="arrow-left" variant="fas" className="text-xs" />
+                                                </button>
+                                                <span className="font-semibold text-slate-900 dark:text-white">
+                                                    {viewMode === 'years' ? 'Select Year' : 'Select Month'}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="p-4">
+                                        {/* Days View */}
+                                        {viewMode === 'days' && (
+                                            <>
+                                                <div className="grid grid-cols-7 mb-2">
+                                                    {weekDays.map(d => (
+                                                        <div key={d} className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wide py-1">
+                                                            {d}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="grid grid-cols-7 gap-1">
+                                                    {calendarGrid.map((cell, idx) => {
+                                                        if (cell.type !== 'current') {
+                                                            return <div key={idx} className="h-9" />;
+                                                        }
+
+                                                        const cellDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), cell.day);
+                                                        const isSelected = selectedDate && isSameDay(selectedDate, cellDate);
+                                                        const isToday = isSameDay(new Date(), cellDate);
+
+                                                        return (
+                                                            <button
+                                                                key={idx}
+                                                                onClick={() => handleDateClick(cell.day)}
+                                                                className={`
+                                                                h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 font-medium
+                                                                ${isSelected ? colors.active : colors.hover}
+                                                                ${!isSelected && isToday ? colors.today : ''}
+                                                                ${!isSelected && !isToday ? 'text-slate-600 dark:text-slate-300' : ''}
+                                                            `}
+                                                            >
+                                                                {cell.day}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {/* Months View */}
+                                        {viewMode === 'months' && (
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {months.map((m, idx) => (
+                                                    <button
+                                                        key={m}
+                                                        onClick={() => handleMonthSelect(idx)}
+                                                        className={`
+                                                        p-2 rounded-lg text-sm transition-all
+                                                        ${viewDate.getMonth() === idx ? colors.active : colors.hover}
+                                                    `}
+                                                    >
+                                                        {m.substring(0, 3)}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Years View */}
+                                        {viewMode === 'years' && (
+                                            <div className="h-64 overflow-y-auto custom-scrollbar pr-2" ref={yearScrollRef}>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {years.map((y) => (
+                                                        <button
+                                                            key={y}
+                                                            data-selected-year={viewDate.getFullYear() === y}
+                                                            onClick={() => handleYearSelect(y)}
+                                                            className={`
+                                                            p-2 rounded-lg text-sm transition-all
+                                                            ${viewDate.getFullYear() === y ? colors.active : colors.hover}
+                                                        `}
+                                                        >
+                                                            {y}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Time Picker Column */}
+                            {(type === 'time' || type === 'datetime') && (
+                                <div className={`
+                                    flex flex-col items-center justify-center gap-4 p-6
+                                    ${type === 'time'
+                                        ? 'w-full min-w-[240px]'
+                                        : 'border-l border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/10 sm:w-auto'
+                                    }
+                                `}>
+                                    {/* Time Header */}
+                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                        Time
+                                    </div>
+
+                                    {/* Hour:Minute Inputs */}
+                                    <div className="flex items-center justify-center gap-3">
+                                        <div className="flex flex-col gap-1.5 items-center">
+                                            <label className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">Hour</label>
+                                            <input
+                                                type="number"
+                                                min="0" max="23"
+                                                className={`
+                                                    w-16 h-14 rounded-xl bg-white dark:bg-slate-800 
+                                                    border-2 border-slate-200 dark:border-slate-700 
+                                                    text-center text-xl font-semibold 
+                                                    text-slate-900 dark:text-white
+                                                    focus:ring-2 ${colors.ring} outline-none 
+                                                    transition-all ${colors.border}
+                                                    hover:border-slate-300 dark:hover:border-slate-600
+                                                `}
+                                                value={selectedDate ? selectedDate.getHours() : 12}
+                                                onChange={(e) => handleTimeChange('hour', parseInt(e.target.value))}
+                                            />
+                                        </div>
+
+                                        <span className="text-slate-300 dark:text-slate-600 text-2xl font-bold mt-6">:</span>
+
+                                        <div className="flex flex-col gap-1.5 items-center">
+                                            <label className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">Minute</label>
+                                            <input
+                                                type="number"
+                                                min="0" max="59"
+                                                className={`
+                                                    w-16 h-14 rounded-xl bg-white dark:bg-slate-800 
+                                                    border-2 border-slate-200 dark:border-slate-700 
+                                                    text-center text-xl font-semibold 
+                                                    text-slate-900 dark:text-white
+                                                    focus:ring-2 ${colors.ring} outline-none 
+                                                    transition-all ${colors.border}
+                                                    hover:border-slate-300 dark:hover:border-slate-600
+                                                `}
+                                                value={selectedDate ? selectedDate.getMinutes() : 0}
+                                                onChange={(e) => handleTimeChange('minute', parseInt(e.target.value))}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Formatted Time Display */}
+                                    <div className={`text-base font-semibold ${colors.text}`}>
+                                        {selectedDate ? formatDate(selectedDate, 'time') : '--:-- --'}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+DateTimePicker.propTypes = {
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    onChange: PropTypes.func,
+    type: PropTypes.oneOf(['date', 'time', 'datetime']),
+    label: PropTypes.string,
+    helperText: PropTypes.string,
+    error: PropTypes.string,
+    placeholder: PropTypes.string,
+    minDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    maxDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    disabled: PropTypes.bool,
+    color: PropTypes.oneOf(['violet', 'blue', 'emerald', 'rose', 'amber', 'black']),
+    size: PropTypes.oneOf(['sm', 'md', 'lg']),
+    variant: PropTypes.oneOf(['outlined', 'filled']),
+    className: PropTypes.string,
+    fullWidth: PropTypes.bool,
+};
+
+export default DateTimePicker;
