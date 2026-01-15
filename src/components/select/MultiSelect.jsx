@@ -51,7 +51,7 @@ const MultiSelect = forwardRef(({
     theme = 'default',
     color = 'violet', // violet, blue, emerald, rose, amber, black
     size = 'md',
-    rounded = 'lg',
+    rounded = 'xl',
     fullWidth = false,
 
     // Chip display mode
@@ -358,11 +358,11 @@ const MultiSelect = forwardRef(({
 
     // Size configurations (matching Input component)
     const sizeConfig = {
-        xs: { minHeight: 'min-h-7', text: 'text-xs', px: 'px-2', icon: 'text-xs', label: 'text-xs', chip: 'text-xs px-1.5 py-0.5' },
-        sm: { minHeight: 'min-h-8', text: 'text-xs', px: 'px-3', icon: 'text-xs', label: 'text-xs', chip: 'text-xs px-2 py-0.5' },
-        md: { minHeight: 'min-h-10', text: 'text-sm', px: 'px-4', icon: 'text-sm', label: 'text-sm', chip: 'text-xs px-2 py-1' },
-        lg: { minHeight: 'min-h-12', text: 'text-base', px: 'px-5', icon: 'text-base', label: 'text-base', chip: 'text-sm px-2.5 py-1' },
-        xl: { minHeight: 'min-h-14', text: 'text-lg', px: 'px-6', icon: 'text-lg', label: 'text-lg', chip: 'text-sm px-3 py-1.5' }
+        xs: { minHeight: 'min-h-7', text: 'text-xs', px: 'px-2', py: 'py-1.5', icon: 'text-xs', label: 'text-xs', chip: 'text-xs px-1.5 py-px' },
+        sm: { minHeight: 'min-h-8', text: 'text-xs', px: 'px-3', py: 'py-2', icon: 'text-xs', label: 'text-xs', chip: 'text-xs px-2 py-px' },
+        md: { minHeight: 'min-h-11', text: 'text-sm', px: 'px-4', py: 'py-2.5', icon: 'text-sm', label: 'text-sm', chip: 'text-xs px-2 py-px' },
+        lg: { minHeight: 'min-h-12', text: 'text-base', px: 'px-5', py: 'py-3.5', icon: 'text-base', label: 'text-base', chip: 'text-sm px-2.5 py-px' },
+        xl: { minHeight: 'min-h-14', text: 'text-lg', px: 'px-6', py: 'py-4', icon: 'text-lg', label: 'text-lg', chip: 'text-sm px-3 py-0.5' }
     };
 
     // Rounded configurations (matching Input component)
@@ -387,7 +387,7 @@ const MultiSelect = forwardRef(({
             disabled: 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-900',
             dropdown: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50',
             option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
-            optionHighlighted: 'bg-slate-50 dark:bg-slate-800/50',
+            optionHighlighted: 'bg-slate-100 dark:bg-slate-800 dark:text-slate-100',
             searchInput: 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
         },
         glass: {
@@ -398,8 +398,8 @@ const MultiSelect = forwardRef(({
             icon: 'text-slate-400 dark:text-slate-400/70',
             disabled: 'opacity-40 cursor-not-allowed',
             dropdown: 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/30 shadow-xl',
-            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-800/50',
-            optionHighlighted: 'bg-slate-50/50 dark:bg-slate-800/30',
+            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-slate-700/50',
+            optionHighlighted: 'bg-slate-100/60 dark:bg-slate-700/50',
             searchInput: 'bg-white/50 dark:bg-slate-800/30 border-slate-200/50 dark:border-slate-700/30 backdrop-blur-sm'
         },
         minimal: {
@@ -410,8 +410,8 @@ const MultiSelect = forwardRef(({
             icon: 'text-slate-400 dark:text-slate-500',
             disabled: 'opacity-50 cursor-not-allowed',
             dropdown: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl mt-2',
-            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800',
-            optionHighlighted: 'bg-slate-50 dark:bg-slate-800/50',
+            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60',
+            optionHighlighted: 'bg-slate-100 dark:bg-slate-700/60',
             searchInput: 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
         },
         outlined: {
@@ -422,8 +422,8 @@ const MultiSelect = forwardRef(({
             icon: 'text-slate-400 dark:text-slate-500',
             disabled: 'opacity-50 cursor-not-allowed',
             dropdown: 'bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 shadow-lg',
-            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
-            optionHighlighted: 'bg-slate-50 dark:bg-slate-800/50',
+            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60',
+            optionHighlighted: 'bg-slate-100 dark:bg-slate-700/60',
             searchInput: 'bg-transparent border-2 border-slate-300 dark:border-slate-600'
         },
         filled: {
@@ -434,8 +434,8 @@ const MultiSelect = forwardRef(({
             icon: 'text-slate-500 dark:text-slate-400',
             disabled: 'opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-900',
             dropdown: 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl',
-            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700',
-            optionHighlighted: 'bg-slate-100 dark:bg-slate-700/50',
+            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600/60',
+            optionHighlighted: 'bg-slate-100 dark:bg-slate-600/60',
             searchInput: 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'
         }
     };
@@ -476,7 +476,7 @@ const MultiSelect = forwardRef(({
         const remainingCount = selectedOptions.length - visibleChips.length;
 
         return (
-            <div className="flex flex-wrap gap-1.5 py-1">
+            <div className="flex flex-wrap gap-1.5">
                 {visibleChips.map(opt => {
                     if (renderChip) {
                         return renderChip(opt, () => handleRemoveChip(opt.value, { stopPropagation: () => { } }));
@@ -534,11 +534,11 @@ const MultiSelect = forwardRef(({
                         w-4 h-4 rounded border-2 flex items-center justify-center transition-colors
                         ${isSelected
                             ? colors.checkbox
-                            : 'border-slate-300 dark:border-slate-600'
+                            : 'border-slate-300 dark:border-slate-400 bg-transparent dark:bg-slate-800'
                         }
                     `}>
                         {isSelected && (
-                            <Icon icon="check" variant="fas" className={`${color === 'white' ? 'text-black' : 'text-white'} text-[10px]`} />
+                            <Icon icon="check" className={`${color === 'white' ? 'text-black' : (color === 'black' ? 'dark:text-black text-white' : 'text-white')} text-[10px]`} />
                         )}
                     </div>
 
@@ -598,7 +598,7 @@ const MultiSelect = forwardRef(({
                 onKeyDown={handleKeyDown}
                 className={`
                     relative flex items-center justify-between cursor-pointer
-                    ${currentSize.minHeight} ${currentSize.px} py-1
+                    ${currentSize.minHeight} ${currentSize.px} ${currentSize.py}
                     ${theme === 'minimal' ? '' : currentRounded}
                     ${currentTheme.wrapper}
                     ${isOpen ? `${currentTheme.focus} ${colors.focus}` : ''}
@@ -648,8 +648,8 @@ const MultiSelect = forwardRef(({
                     )}
 
                     {/* Dropdown Arrow */}
-                    <span className={`${currentTheme.icon} transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                        <Icon icon={dropdownIcon} variant="fas" className="text-xs" />
+                    <span className={`${currentTheme.icon} inline-flex items-center justify-center transition-transform duration-200 origin-center ${isOpen ? 'rotate-180' : ''}`}>
+                        <Icon icon={dropdownIcon} className="text-xs" />
                     </span>
                 </div>
             </div>
@@ -696,7 +696,7 @@ const MultiSelect = forwardRef(({
                                     onClick={(e) => e.stopPropagation()}
                                 />
                                 <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
-                                    <Icon icon="search" variant="fas" />
+                                    <Icon icon="search" />
                                 </span>
                             </div>
                         </div>
@@ -754,7 +754,7 @@ const MultiSelect = forwardRef(({
                             })
                         ) : (
                             <div className="px-3 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                                <Icon icon="inbox" variant="fas" className="text-2xl mb-2 opacity-50" />
+                                <Icon icon="inbox" className="text-2xl mb-2 opacity-50" />
                                 <p>{noOptionsText}</p>
                             </div>
                         )}

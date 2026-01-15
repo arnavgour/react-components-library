@@ -52,7 +52,7 @@ const Select = forwardRef(({
     theme = 'default',
     color = 'violet', // violet, blue, emerald, rose, amber, black
     size = 'md',
-    rounded = 'lg',
+    rounded = 'xl',
     fullWidth = false,
 
     // Label & Help
@@ -282,37 +282,37 @@ const Select = forwardRef(({
     // Color Configuration
     const colorConfig = {
         violet: {
-            focus: 'border-violet-500 ring-violet-500/20',
+            focus: 'border-violet-500 ring-violet-500/20 dark:ring-violet-500/90',
             optionSelected: 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300',
             icon: 'text-violet-500',
             iconSelected: 'text-violet-500'
         },
         blue: {
-            focus: 'border-blue-500 ring-blue-500/20',
+            focus: 'border-blue-500 ring-blue-500/90',
             optionSelected: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
             icon: 'text-blue-500',
             iconSelected: 'text-blue-500'
         },
         emerald: {
-            focus: 'border-emerald-500 ring-emerald-500/20',
+            focus: 'border-emerald-500 ring-emerald-500/90',
             optionSelected: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300',
             icon: 'text-emerald-500',
             iconSelected: 'text-emerald-500'
         },
         rose: {
-            focus: 'border-rose-500 ring-rose-500/20',
+            focus: 'border-rose-500 ring-rose-500/70',
             optionSelected: 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300',
             icon: 'text-rose-500',
             iconSelected: 'text-rose-500'
         },
         amber: {
-            focus: 'border-amber-500 ring-amber-500/20',
+            focus: 'border-amber-500 ring-amber-500/90',
             optionSelected: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
             icon: 'text-amber-500',
             iconSelected: 'text-amber-500'
         },
         black: {
-            focus: 'border-slate-800 dark:border-slate-200 ring-slate-500/20',
+            focus: 'border-slate-800 dark:border-slate-200 ring-slate-500/20 dark:ring-slate-500/90',
             optionSelected: 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200',
             icon: 'text-slate-800 dark:text-slate-200',
             iconSelected: 'text-slate-800 dark:text-slate-200'
@@ -324,11 +324,11 @@ const Select = forwardRef(({
 
     // Size configurations (matching Input component)
     const sizeConfig = {
-        xs: { height: 'h-7', text: 'text-xs', px: 'px-2', icon: 'text-xs', label: 'text-xs' },
-        sm: { height: 'h-8', text: 'text-xs', px: 'px-3', icon: 'text-xs', label: 'text-xs' },
-        md: { height: 'h-10', text: 'text-sm', px: 'px-4', icon: 'text-sm', label: 'text-sm' },
-        lg: { height: 'h-12', text: 'text-base', px: 'px-5', icon: 'text-base', label: 'text-base' },
-        xl: { height: 'h-14', text: 'text-lg', px: 'px-6', icon: 'text-lg', label: 'text-lg' }
+        xs: { height: 'min-h-7', text: 'text-xs', px: 'px-2', py: 'py-1.5', icon: 'text-xs', label: 'text-xs' },
+        sm: { height: 'min-h-8', text: 'text-xs', px: 'px-3', py: 'py-2', icon: 'text-xs', label: 'text-xs' },
+        md: { height: 'min-h-11', text: 'text-sm', px: 'px-4', py: 'py-2.5', icon: 'text-sm', label: 'text-sm' },
+        lg: { height: 'min-h-12', text: 'text-base', px: 'px-5', py: 'py-3.5', icon: 'text-base', label: 'text-base' },
+        xl: { height: 'min-h-14', text: 'text-lg', px: 'px-6', py: 'py-4', icon: 'text-lg', label: 'text-lg' }
     };
 
     // Rounded configurations (matching Input component)
@@ -353,7 +353,7 @@ const Select = forwardRef(({
             disabled: 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-900',
             dropdown: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50',
             option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
-            optionHighlighted: 'bg-slate-50 dark:bg-slate-800/50',
+            optionHighlighted: 'bg-slate-100 dark:bg-slate-800 dark:text-slate-100',
             searchInput: 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
         },
         glass: {
@@ -364,8 +364,8 @@ const Select = forwardRef(({
             icon: 'text-slate-400 dark:text-slate-400/70',
             disabled: 'opacity-40 cursor-not-allowed',
             dropdown: 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/30 shadow-xl',
-            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-800/50',
-            optionHighlighted: 'bg-slate-50/50 dark:bg-slate-800/30',
+            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-slate-700/50',
+            optionHighlighted: 'bg-slate-100/60 dark:bg-slate-700/50',
             searchInput: 'bg-white/50 dark:bg-slate-800/30 border-slate-200/50 dark:border-slate-700/30 backdrop-blur-sm'
         },
         minimal: {
@@ -376,8 +376,8 @@ const Select = forwardRef(({
             icon: 'text-slate-400 dark:text-slate-500',
             disabled: 'opacity-50 cursor-not-allowed',
             dropdown: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl mt-2',
-            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800',
-            optionHighlighted: 'bg-slate-50 dark:bg-slate-800/50',
+            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60',
+            optionHighlighted: 'bg-slate-100 dark:bg-slate-700/60',
             searchInput: 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
         },
         outlined: {
@@ -388,8 +388,8 @@ const Select = forwardRef(({
             icon: 'text-slate-400 dark:text-slate-500',
             disabled: 'opacity-50 cursor-not-allowed',
             dropdown: 'bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 shadow-lg',
-            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
-            optionHighlighted: 'bg-slate-50 dark:bg-slate-800/50',
+            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60',
+            optionHighlighted: 'bg-slate-100 dark:bg-slate-700/60',
             searchInput: 'bg-transparent border-2 border-slate-300 dark:border-slate-600'
         },
         filled: {
@@ -400,8 +400,8 @@ const Select = forwardRef(({
             icon: 'text-slate-500 dark:text-slate-400',
             disabled: 'opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-900',
             dropdown: 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl',
-            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700',
-            optionHighlighted: 'bg-slate-100 dark:bg-slate-700/50',
+            option: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600/60',
+            optionHighlighted: 'bg-slate-100 dark:bg-slate-600/60',
             searchInput: 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'
         }
     };
@@ -474,7 +474,7 @@ const Select = forwardRef(({
                     </div>
                 </div>
                 {isSelected && (
-                    <Icon icon="check" variant="fas" className={`${colors.iconSelected} text-sm flex-shrink-0`} />
+                    <Icon icon="check" className={`${colors.iconSelected} text-sm flex-shrink-0`} />
                 )}
             </div>
         );
@@ -512,7 +512,7 @@ const Select = forwardRef(({
                 onKeyDown={handleKeyDown}
                 className={`
                     relative flex items-center justify-between cursor-pointer
-                    ${currentSize.height} ${currentSize.px}
+                    ${currentSize.height} ${currentSize.px} ${currentSize.py}
                     ${theme === 'minimal' ? '' : currentRounded}
                     ${currentTheme.wrapper}
                     ${isOpen ? `${currentTheme.focus} ${colors.focus}` : ''}
@@ -562,8 +562,8 @@ const Select = forwardRef(({
                     )}
 
                     {/* Dropdown Arrow */}
-                    <span className={`${currentTheme.icon} transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
-                        <Icon icon={dropdownIcon} variant="fas" className="text-xs" />
+                    <span className={`${currentTheme.icon} inline-flex items-center justify-center transition-transform duration-200 origin-center ${isOpen ? 'rotate-180' : ''}`}>
+                        <Icon icon={dropdownIcon} className="text-xs" />
                     </span>
                 </div>
             </div>
@@ -610,7 +610,7 @@ const Select = forwardRef(({
                                     onClick={(e) => e.stopPropagation()}
                                 />
                                 <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
-                                    <Icon icon="search" variant="fas" />
+                                    <Icon icon="search" />
                                 </span>
                             </div>
                         </div>
@@ -667,7 +667,7 @@ const Select = forwardRef(({
                             })
                         ) : (
                             <div className="px-3 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                                <Icon icon="inbox" variant="fas" className="text-2xl mb-2 opacity-50" />
+                                <Icon icon="inbox" className="text-2xl mb-2 opacity-50" />
                                 <p>{noOptionsText}</p>
                             </div>
                         )}

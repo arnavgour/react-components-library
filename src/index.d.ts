@@ -20,15 +20,37 @@ export interface CheckboxProps {
   label?: string;
   description?: string;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'violet' | 'blue' | 'emerald' | 'rose' | 'amber';
-  variant?: 'default' | 'card' | 'button';
+  color?: 'violet' | 'blue' | 'emerald' | 'rose' | 'amber' | 'black';
+  variant?: 'simple' | 'card';
   disabled?: boolean;
   required?: boolean;
   name?: string;
-  value?: string;
+  value?: string | number;
   indeterminate?: boolean;
+  icon?: string;
+  className?: string;
 }
-export const Checkbox: ForwardRefExoticComponent<CheckboxProps & RefAttributes<HTMLInputElement>>;
+export const Checkbox: ForwardRefExoticComponent<CheckboxProps & RefAttributes<HTMLInputElement>> & {
+  Group: React.FC<CheckboxGroupProps>;
+};
+
+// CheckboxGroup
+export interface CheckboxGroupProps {
+  children?: React.ReactNode;
+  value?: (string | number)[];
+  defaultValue?: (string | number)[];
+  onChange?: (values: (string | number)[]) => void;
+  orientation?: 'horizontal' | 'vertical';
+  label?: string;
+  description?: string;
+  error?: string;
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'violet' | 'blue' | 'emerald' | 'rose' | 'amber' | 'black';
+  variant?: 'simple' | 'card';
+  disabled?: boolean;
+  className?: string;
+}
+export const CheckboxGroup: React.FC<CheckboxGroupProps>;
 
 // DateTimePicker
 export interface DateTimePickerProps {
@@ -115,19 +137,39 @@ export const Textarea: ForwardRefExoticComponent<TextareaProps & RefAttributes<H
 // Radio
 export interface RadioProps {
   checked?: boolean;
-  defaultChecked?: boolean;
-  onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   label?: string;
   description?: string;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'violet' | 'blue' | 'emerald' | 'rose' | 'amber';
-  variant?: 'default' | 'card' | 'button';
+  color?: 'violet' | 'blue' | 'emerald' | 'rose' | 'amber' | 'black';
+  variant?: 'simple' | 'card';
   disabled?: boolean;
-  required?: boolean;
-  name?: string;
-  value?: string;
+  value?: string | number;
+  icon?: string;
+  className?: string;
 }
-export const Radio: ForwardRefExoticComponent<RadioProps & RefAttributes<HTMLInputElement>>;
+export const Radio: ForwardRefExoticComponent<RadioProps & RefAttributes<HTMLInputElement>> & {
+  Group: React.FC<RadioGroupProps>;
+};
+
+// RadioGroup
+export interface RadioGroupProps {
+  children?: React.ReactNode;
+  value?: string | number;
+  defaultValue?: string | number;
+  onChange?: (value: string | number) => void;
+  name?: string;
+  orientation?: 'horizontal' | 'vertical';
+  label?: string;
+  description?: string;
+  error?: string;
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'violet' | 'blue' | 'emerald' | 'rose' | 'amber' | 'black';
+  variant?: 'simple' | 'card';
+  disabled?: boolean;
+  className?: string;
+}
+export const RadioGroup: React.FC<RadioGroupProps>;
 
 // Select
 export interface SelectOption {

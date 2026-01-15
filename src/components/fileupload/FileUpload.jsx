@@ -308,7 +308,7 @@ const FileUpload = ({
                 `}>
                     <Icon
                         icon="cloud-arrow-up"
-                        variant="fas"
+                       
                         className={`text-xl ${disabled ? '' : (isDragging ? colors.text : 'text-slate-400')}`}
                     />
                 </div>
@@ -325,7 +325,7 @@ const FileUpload = ({
             {/* Error Message */}
             {error && (
                 <div className="mt-2 text-xs text-red-500 flex items-center gap-1.5">
-                    <Icon icon="circle-info" variant="fas" />
+                    <Icon icon="circle-info" />
                     {error}
                 </div>
             )}
@@ -348,7 +348,7 @@ const FileUpload = ({
                             `}>
                                 <Icon
                                     icon={file.type.includes('image') ? 'image' : 'file-lines'}
-                                    variant="fas"
+                                   
                                     className={`${colors.text} text-sm`}
                                 />
                             </div>
@@ -365,7 +365,7 @@ const FileUpload = ({
 
                             {/* Success Icon */}
                             <div className={`mr-2 ${colors.text}`}>
-                                <Icon icon="circle-check" variant="fas" className="text-sm" />
+                                <Icon icon="circle-check" className="text-sm" />
                             </div>
 
                             {/* Remove Button */}
@@ -376,7 +376,7 @@ const FileUpload = ({
                                     transition-colors
                                 "
                             >
-                                <Icon icon="trash" variant="fas" className="text-xs" />
+                                <Icon icon="trash" className="text-xs" />
                             </button>
                         </div>
                     ))}

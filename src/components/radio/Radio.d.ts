@@ -6,46 +6,70 @@ import { ReactNode, InputHTMLAttributes, CSSProperties } from 'react';
 
 export type RadioColor = 'violet' | 'blue' | 'emerald' | 'rose' | 'amber' | 'black';
 export type RadioSize = 'sm' | 'md' | 'lg';
-export type RadioVariant = 'default' | 'card' | 'button';
+export type RadioVariant = 'simple' | 'card';
 export type IconVariant = 'fas' | 'far' | 'fal' | 'fad';
 
-export interface RadioOption {
-    label: string;
-    value: string | number;
-    description?: string;
-    icon?: string;
-    iconVariant?: IconVariant;
-    disabled?: boolean;
-}
-
 export interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange'> {
-    // Data
-    options?: RadioOption[];
-    value?: string | number;
-    defaultValue?: string | number;
-    onChange?: (value: string | number, option?: RadioOption) => void;
+    // State
+    checked?: boolean;
+    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 
     // Configuration
-    name: string;
+    value?: string | number;
     disabled?: boolean;
-    required?: boolean;
 
     // Appearance
     variant?: RadioVariant;
     color?: RadioColor;
     size?: RadioSize;
-    orientation?: 'horizontal' | 'vertical';
 
     // Label
-    label?: string;
-    helperText?: string;
+    label?: string | ReactNode;
+    description?: string;
+
+    // Icons
+    icon?: string;
+    iconVariant?: IconVariant;
 
     // Styling
     className?: string;
-    optionClassName?: string;
-    labelClassName?: string;
     style?: CSSProperties;
 }
 
-declare const Radio: React.FC<RadioProps>;
+export interface RadioGroupProps {
+    // Children
+    children?: ReactNode;
+
+    // State
+    value?: string | number;
+    defaultValue?: string | number;
+    onChange?: (value: string | number) => void;
+
+    // Configuration
+    name?: string;
+
+    // Layout
+    orientation?: 'horizontal' | 'vertical';
+
+    // Labels
+    label?: string;
+    description?: string;
+    error?: string;
+
+    // Shared props for children
+    size?: RadioSize;
+    color?: RadioColor;
+    variant?: RadioVariant;
+    disabled?: boolean;
+
+    // Styling
+    className?: string;
+}
+
+interface RadioComponent extends React.FC<RadioProps> {
+    Group: React.FC<RadioGroupProps>;
+}
+
+declare const Radio: RadioComponent;
+export const RadioGroup: React.FC<RadioGroupProps>;
 export default Radio;

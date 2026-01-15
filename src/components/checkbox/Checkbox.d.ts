@@ -6,7 +6,7 @@ import { ReactNode, InputHTMLAttributes, CSSProperties } from 'react';
 
 export type CheckboxColor = 'violet' | 'blue' | 'emerald' | 'rose' | 'amber' | 'black';
 export type CheckboxSize = 'sm' | 'md' | 'lg';
-export type CheckboxVariant = 'default' | 'card' | 'switch';
+export type CheckboxVariant = 'simple' | 'card';
 export type IconVariant = 'fas' | 'far' | 'fal' | 'fad';
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'onChange'> {
@@ -30,19 +30,47 @@ export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement
     // Label
     label?: string | ReactNode;
     description?: string;
-    labelPosition?: 'left' | 'right';
 
     // Icons
     icon?: string;
     iconVariant?: IconVariant;
-    checkedIcon?: string;
-    uncheckedIcon?: string;
 
     // Styling
     className?: string;
-    labelClassName?: string;
     style?: CSSProperties;
 }
 
-declare const Checkbox: React.FC<CheckboxProps>;
+export interface CheckboxGroupProps {
+    // Children
+    children?: ReactNode;
+
+    // State
+    value?: (string | number)[];
+    defaultValue?: (string | number)[];
+    onChange?: (values: (string | number)[]) => void;
+
+    // Layout
+    orientation?: 'horizontal' | 'vertical';
+
+    // Labels
+    label?: string;
+    description?: string;
+    error?: string;
+
+    // Shared props for children
+    size?: CheckboxSize;
+    color?: CheckboxColor;
+    variant?: CheckboxVariant;
+    disabled?: boolean;
+
+    // Styling
+    className?: string;
+}
+
+interface CheckboxComponent extends React.FC<CheckboxProps> {
+    Group: React.FC<CheckboxGroupProps>;
+}
+
+declare const Checkbox: CheckboxComponent;
+export const CheckboxGroup: React.FC<CheckboxGroupProps>;
 export default Checkbox;

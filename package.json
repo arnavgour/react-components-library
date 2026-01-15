@@ -1,7 +1,7 @@
 {
   "name": "@argojun/react-components",
-  "version": "1.0.0",
-  "description": "A collection of beautifully crafted React components with Tailwind CSS",
+  "version": "1.0.2",
+  "description": "A collection of beautifully crafted React components designed to work with Tailwind CSS",
   "type": "module",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -12,15 +12,16 @@
       "require": "./dist/index.cjs.js",
       "types": "./dist/index.d.ts"
     },
-    "./styles.css": "./dist/styles.css"
+    "./tailwind": {
+      "require": "./src/tailwind.preset.cjs"
+    }
   },
   "files": [
     "dist",
+    "src/tailwind.preset.cjs",
     "README.md"
   ],
-  "sideEffects": [
-    "**/*.css"
-  ],
+  "sideEffects": false,
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build"
@@ -50,24 +51,31 @@
   },
   "peerDependencies": {
     "react": ">=17.0.0",
-    "react-dom": ">=17.0.0"
+    "react-dom": ">=17.0.0",
+    "tailwindcss": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": false
+    }
   },
   "dependencies": {
     "prop-types": "^15.8.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0",
-    "@babel/preset-env": "^7.24.0",
-    "@babel/preset-react": "^7.24.0",
+    "@babel/core": "^7.28.6",
+    "@babel/plugin-bugfix-firefox-class-in-computed-class-key": "^7.28.5",
+    "@babel/preset-env": "^7.28.6",
+    "@babel/preset-react": "^7.28.5",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
     "rollup": "^4.12.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
-    "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1"
   }
 }

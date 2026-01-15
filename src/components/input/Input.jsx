@@ -39,7 +39,7 @@ const Input = forwardRef(({
     theme = 'default',
     color = 'violet', // violet, blue, emerald, rose, amber, black
     size = 'md',
-    rounded = 'lg',
+    rounded = 'xl',
     fullWidth = false,
 
     // Label & Help
@@ -49,11 +49,11 @@ const Input = forwardRef(({
     errorText,
     successText,
 
-    // Icons - FontAwesome compatible
+    // Icons
     leftIcon,
-    leftIconVariant = 'fas',
+    leftIconVariant = 'outline',
     rightIcon,
-    rightIconVariant = 'fas',
+    rightIconVariant = 'outline',
     iconColor,
 
     // Prefix/Suffix
@@ -160,7 +160,7 @@ const Input = forwardRef(({
             iconPadding: { left: 'pl-8', right: 'pr-8' }
         },
         md: {
-            input: 'h-10 text-sm px-4',
+            input: 'h-11 text-sm px-4',
             icon: 'text-sm',
             label: 'text-sm',
             iconPadding: { left: 'pl-10', right: 'pr-10' }
@@ -317,7 +317,7 @@ const Input = forwardRef(({
                 className={`
           relative flex items-center
           ${currentTheme.wrapper}
-          ${currentRounded}
+          ${theme === 'minimal' ? '' : currentRounded}
           ${currentTheme.focus}
           ${colors.focus}
           ${disabled ? currentTheme.disabled : ''}
@@ -409,7 +409,7 @@ const Input = forwardRef(({
                             className={`p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${currentTheme.icon} ${currentSize.icon}`}
                             tabIndex={-1}
                         >
-                            <Icon icon="xmark" variant="fas" />
+                            <Icon icon="xmark" />
                         </button>
                     )}
 
@@ -421,7 +421,7 @@ const Input = forwardRef(({
                             className={`p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${currentTheme.icon} ${currentSize.icon}`}
                             tabIndex={-1}
                         >
-                            <Icon icon={showPassword ? 'eye-slash' : 'eye'} variant="fas" />
+                            <Icon icon={showPassword ? 'eye-slash' : 'eye'} />
                         </button>
                     )}
 
@@ -433,7 +433,7 @@ const Input = forwardRef(({
                             className={`p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${copied ? 'text-emerald-500' : currentTheme.icon} ${currentSize.icon}`}
                             tabIndex={-1}
                         >
-                            <Icon icon={copied ? 'check' : 'copy'} variant="fas" />
+                            <Icon icon={copied ? 'check' : 'copy'} />
                         </button>
                     )}
                 </div>
@@ -509,9 +509,9 @@ Input.propTypes = {
 
     // Icons
     leftIcon: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
-    leftIconVariant: PropTypes.oneOf(['fas', 'far', 'fal', 'fad']),
+    leftIconVariant: PropTypes.oneOf(['outline', 'solid']),
     rightIcon: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
-    rightIconVariant: PropTypes.oneOf(['fas', 'far', 'fal', 'fad']),
+    rightIconVariant: PropTypes.oneOf(['outline', 'solid']),
     iconColor: PropTypes.string,
 
     // Prefix/Suffix

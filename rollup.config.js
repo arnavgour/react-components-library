@@ -3,7 +3,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
 import terser from '@rollup/plugin-terser';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-import postcss from 'rollup-plugin-postcss';
+// postcss removed - styles are now injected via JS
 
 export default {
   input: 'src/index.js',
@@ -32,14 +32,6 @@ export default {
       exclude: 'node_modules/**',
       presets: ['@babel/preset-env', '@babel/preset-react'],
       extensions: ['.js', '.jsx'],
-    }),
-    postcss({
-      config: {
-        path: './postcss.config.js',
-      },
-      extensions: ['.css'],
-      minimize: true,
-      extract: 'styles.css',
     }),
     terser(),
   ],

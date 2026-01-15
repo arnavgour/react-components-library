@@ -71,7 +71,7 @@ export const RadioGroup = ({
                 {/* Error Message */}
                 {error && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                        <Icon icon="circle-exclamation" variant="fas" />
+                        <Icon icon="circle-exclamation" />
                         {error}
                     </p>
                 )}
@@ -229,7 +229,7 @@ const Radio = ({
                         {icon && (
                             <Icon
                                 icon={icon}
-                                variant="fas"
+                               
                                 className={isChecked ? colors.text : 'text-slate-400'}
                             />
                         )}

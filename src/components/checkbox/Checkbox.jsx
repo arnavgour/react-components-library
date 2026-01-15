@@ -82,7 +82,7 @@ export const CheckboxGroup = ({
                 {/* Error Message */}
                 {error && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                        <Icon icon="circle-exclamation" variant="fas" />
+                        <Icon icon="circle-exclamation" />
                         {error}
                     </p>
                 )}
@@ -230,7 +230,7 @@ const Checkbox = ({
                     ${isChecked ? colors.checked : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'}
                 `}>
                     {isChecked && (
-                        <Icon icon="check" variant="fas" className="text-white dark:text-slate-900" />
+                        <Icon icon="check" className="text-white dark:text-slate-900" />
                     )}
                 </div>
 
@@ -240,7 +240,7 @@ const Checkbox = ({
                         {icon && (
                             <Icon
                                 icon={icon}
-                                variant="fas"
+                               
                                 className={isChecked ? colors.text : 'text-slate-400'}
                             />
                         )}
@@ -286,11 +286,11 @@ const Checkbox = ({
                     }
                 `}>
                     {indeterminate ? (
-                        <Icon icon="minus" variant="fas" className={`text-white dark:text-slate-900 ${sizeClasses.icon}`} />
+                        <Icon icon="minus" className={`text-white dark:text-slate-900 ${sizeClasses.icon}`} />
                     ) : (
                         <Icon
                             icon="check"
-                            variant="fas"
+                           
                             className={`
                                 text-white dark:text-slate-900 transition-opacity duration-200
                                 ${sizeClasses.icon}
