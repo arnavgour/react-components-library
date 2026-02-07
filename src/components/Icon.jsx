@@ -15,10 +15,13 @@ const iconPaths = {
   'chevron-up': 'M18 15l-6-6-6 6',
   'chevron-left': 'M15 18l-6-6 6-6',
   'chevron-right': 'M9 6l6 6-6 6',
+  'chevrons-left': 'M11 19l-7-7 7-7m8 14l-7-7 7-7',
+  'chevrons-right': 'M13 5l7 7-7 7M5 5l7 7-7 7',
   'arrow-left': 'M19 12H5m0 0l7 7m-7-7l7-7',
   'arrow-right': 'M5 12h14m0 0l-7-7m7 7l-7 7',
   'arrow-up': 'M12 19V5m0 0l-7 7m7-7l7 7',
   'arrow-down': 'M12 5v14m0 0l7-7m-7 7l-7-7',
+  'arrows-up-down': 'M7 15l5 5 5-5M7 9l5-5 5 5',
   'menu': 'M4 6h16M4 12h16M4 18h16',
   'x': 'M6 18L18 6M6 6l12 12',
   'xmark': 'M6 18L18 6M6 6l12 12',
@@ -161,6 +164,24 @@ const iconPaths = {
   'box': 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
   'universal-access': 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
   'feather': 'M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5z M16 8L2 22 M17.5 15H9',
+
+  // Charts & Data Visualization
+  'chart-bar': 'M3 13v8h4v-8H3zM8 21v-4h4v4h-4zM13 21v-12h4v12h-4zM18 21v-16h4v16h-4z',
+  'chart-line': 'M3 3v18h18M7 12l4-4 4 4 6-6',
+  'chart-area': 'M3 3v18h18M7 12l4-4 4 4 6-6v8H7v-4z',
+  'chart-pie': 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2M12 12L12 2M12 12L17.25 6.25M12 12L4 12M12 12L11 19.93',
+  'radar': 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
+  'trending-up': 'M3 17l9-9 5 5 7-7M21 7v6h-6',
+  'stairs': 'M3 21h18M3 21V9h6v6h6v6h6',
+  'dots': 'M12 8a2 2 0 100-4 2 2 0 000 4zm0 6a2 2 0 100-4 2 2 0 000 4zm0 6a2 2 0 100-4 2 2 0 000 4z',
+  'layers': 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
+  'half-circle': 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10V2z',
+  'expand': 'M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3',
+  'shape': 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
+  'gauge': 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v6h2V7zm0 8h-2v2h2v-2z',
+  'target': 'M12 12m-10 0a10 10 0 1 0 20 0a10 10 0 1 0 -20 0 M12 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0 M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0',
+  'type': 'M4 7V4h16v3M9 20h6M12 4v16',
+  'curved-line': 'M3 17C6 17 7 7 12 7s6 10 9 10',
 
   // Brands (simplified representations)
   'github': 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22',
@@ -324,7 +345,7 @@ Icon.propTypes = {
 // Export the list of available icons for documentation
 export const iconNames = Object.keys(iconPaths);
 export const iconCategories = {
-  'Navigation & UI': ['chevron-down', 'chevron-up', 'chevron-left', 'chevron-right', 'arrow-left', 'arrow-right', 'arrow-up', 'arrow-down', 'menu', 'x', 'xmark', 'plus', 'minus', 'check', 'external-link'],
+  'Navigation & UI': ['chevron-down', 'chevron-up', 'chevron-left', 'chevron-right', 'chevrons-left', 'chevrons-right', 'arrow-left', 'arrow-right', 'arrow-up', 'arrow-down', 'arrows-up-down', 'menu', 'x', 'xmark', 'plus', 'minus', 'check', 'external-link'],
   'Actions': ['search', 'filter', 'edit', 'trash', 'copy', 'download', 'upload', 'refresh', 'settings', 'cog'],
   'Status & Alerts': ['info', 'circle-info', 'warning', 'triangle-exclamation', 'error', 'circle-exclamation', 'success', 'circle-check', 'question', 'circle-question'],
   'Form Elements': ['eye', 'eye-slash', 'lock', 'unlock'],
@@ -334,6 +355,7 @@ export const iconCategories = {
   'Files & Documents': ['file', 'file-lines', 'folder', 'folder-open', 'document', 'clipboard'],
   'Date & Time': ['calendar', 'calendar-days', 'clock', 'time'],
   'Layout & Design': ['grid', 'list', 'list-check', 'table', 'columns'],
+  'Charts & Data Visualization': ['chart-bar', 'chart-line', 'chart-area', 'chart-pie', 'radar', 'trending-up', 'curved-line', 'stairs', 'dots', 'layers', 'half-circle', 'expand', 'shape', 'gauge', 'target', 'type'],
   'Development': ['code', 'terminal', 'bug', 'database', 'server'],
   'Commerce': ['cart', 'shopping-cart', 'credit-card', 'tag', 'tags', 'gift'],
   'Shapes & Symbols': ['circle', 'circle-dot', 'square', 'square-check', 'heart', 'star', 'bookmark', 'flag'],

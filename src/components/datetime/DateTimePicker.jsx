@@ -183,6 +183,7 @@ const DateTimePicker = ({
     fullWidth = false,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [dropUp, setDropUp] = useState(false);
     const containerRef = useRef(null);
     const yearScrollRef = useRef(null);
     const hourWheelRef = useRef(null);
@@ -426,6 +427,29 @@ const DateTimePicker = ({
         setViewDate(newDate);
     };
 
+    // Handle toggle with position calculation
+    const handleToggle = () => {
+        if (disabled) return;
+        
+        if (!isOpen) {
+            // Calculate if we should drop up or down
+            if (containerRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                
+                // Estimate popover height based on type
+                // Date picker: ~400px, Time picker: ~300px, DateTime: ~400px
+                const estimatedHeight = type === 'time' ? 300 : 400;
+                
+                // If not enough space below and more space above, drop up
+                setDropUp(spaceBelow < estimatedHeight && spaceAbove > spaceBelow);
+            }
+        }
+        
+        setIsOpen(!isOpen);
+    };
+
     // Calendar Grid Generation
     const generateCalendar = () => {
         const year = viewDate.getFullYear();
@@ -502,7 +526,7 @@ const DateTimePicker = ({
                 {/* Trigger Input */}
                 <div
                     className={inputClasses}
-                    onClick={() => !disabled && setIsOpen(!isOpen)}
+                    onClick={handleToggle}
                     role="button"
                     tabIndex={0}
                 >
@@ -542,7 +566,13 @@ const DateTimePicker = ({
                 {/* Popover */}
                 {isOpen && (
                     <div
-                        className="absolute top-full left-0 mt-2 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden min-w-[320px] w-fit animate-in fade-in slide-in-from-top-2 duration-150"
+                        className={`
+                            absolute left-0 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden min-w-[320px] w-fit animate-in fade-in duration-150
+                            ${dropUp 
+                                ? 'bottom-full mb-2 slide-in-from-bottom-2' 
+                                : 'top-full mt-2 slide-in-from-top-2'
+                            }
+                        `}
                     >
 
 

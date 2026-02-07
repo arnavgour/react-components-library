@@ -95,9 +95,11 @@ const MultiSelect = forwardRef(({
     const [apiOptions, setApiOptions] = useState([]);
     const [apiLoading, setApiLoading] = useState(false);
     const [apiError, setApiError] = useState(null);
+    const [dropUp, setDropUp] = useState(false);
     const containerRef = useRef(null);
     const searchInputRef = useRef(null);
     const triggerRef = useRef(null);
+    const dropdownRef = useRef(null);
 
     // Use forwarded ref or internal ref
     const selectRef = ref || triggerRef;
@@ -222,6 +224,18 @@ const MultiSelect = forwardRef(({
     // Handlers
     const handleToggle = () => {
         if (!disabled && !isLoading) {
+            if (!isOpen) {
+                // Calculate if we should drop up or down
+                if (containerRef.current) {
+                    const rect = containerRef.current.getBoundingClientRect();
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    const dropdownHeight = 280; // Approximate max height of dropdown
+
+                    // If not enough space below and more space above, drop up
+                    setDropUp(spaceBelow < dropdownHeight && spaceAbove > spaceBelow);
+                }
+            }
             setIsOpen(!isOpen);
             if (isOpen) {
                 setSearchQuery('');
@@ -379,7 +393,7 @@ const MultiSelect = forwardRef(({
     // Theme configurations (matching Select component)
     const themeConfig = {
         default: {
-            wrapper: 'bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 shadow-sm',
+            wrapper: 'border border-slate-200 dark:border-slate-700',
             text: 'text-slate-900 dark:text-white',
             placeholder: 'text-slate-400 dark:text-slate-500',
             focus: 'bg-white dark:bg-slate-950 ring-1',
@@ -664,8 +678,10 @@ const MultiSelect = forwardRef(({
             {/* Dropdown */}
             {isOpen && !disabled && (
                 <div
+                    ref={dropdownRef}
                     className={`
-                        absolute z-50 w-full mt-1.5 overflow-hidden
+                        absolute z-50 w-full overflow-hidden
+                        ${dropUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}
                         ${theme === 'minimal' ? 'rounded-lg' : currentRounded}
                         ${currentTheme.dropdown}
                     `}

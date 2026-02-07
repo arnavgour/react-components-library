@@ -218,3 +218,67 @@ export interface MultiSelectProps {
   maxSelections?: number;
 }
 export const MultiSelect: ForwardRefExoticComponent<MultiSelectProps & RefAttributes<HTMLInputElement>>;
+
+// Table
+export interface TableColumn {
+  accessor: string;
+  header: string;
+  width?: string | number;
+  minWidth?: string | number;
+  render?: (value: any, row: any, rowIndex: number) => React.ReactNode;
+  sortable?: boolean;
+  filterable?: boolean;
+  filterFn?: (cellValue: any, filterValue: string, row: any) => boolean;
+  sortFn?: (a: any, b: any, direction: 'asc' | 'desc') => number;
+  icon?: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+export interface TableProps {
+  data?: any[];
+  columns?: TableColumn[];
+  filterable?: boolean;
+  sortable?: boolean;
+  paginated?: boolean;
+  selectable?: boolean;
+  resizable?: boolean;
+  theme?: 'default' | 'glass' | 'minimal' | 'striped' | 'bordered' | 'modern' | 'elegant' | 'corporate';
+  color?: 'violet' | 'blue' | 'emerald' | 'rose' | 'amber' | 'black';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  className?: string;
+  onRowClick?: (row: any, rowIndex: number) => void;
+}
+
+export const Table: ForwardRefExoticComponent<TableProps & RefAttributes<HTMLDivElement>>;
+
+// Charts
+export {
+  BarChart,
+  LineChart,
+  AreaChart,
+  PieChart,
+  RadarChart,
+  RadialChart,
+  SparklineChart,
+  ChartTooltip,
+  ChartLegend,
+  ChartColor,
+  ChartTheme,
+  ChartTooltipProps,
+  ChartLegendProps,
+  BarChartProps,
+  BarChartVariant,
+  LineChartProps,
+  LineChartVariant,
+  AreaChartProps,
+  AreaChartVariant,
+  PieChartProps,
+  PieChartVariant,
+  RadarChartProps,
+  RadarChartVariant,
+  RadialChartProps,
+  RadialChartVariant,
+  SparklineChartProps,
+  SparklineChartVariant,
+} from './components/charts';

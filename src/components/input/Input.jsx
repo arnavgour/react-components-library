@@ -193,7 +193,7 @@ const Input = forwardRef(({
     // Theme configurations
     const themeConfig = {
         default: {
-            wrapper: 'bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 shadow-sm',
+            wrapper: 'border border-slate-200 dark:border-slate-700',
             input: 'bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:text-sm',
             focus: 'focus-within:ring-1 focus-within:bg-white dark:focus-within:bg-slate-950',
             icon: 'text-slate-400 dark:text-slate-500',

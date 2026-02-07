@@ -1,6 +1,6 @@
 {
   "name": "@argojun/react-components",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A collection of beautifully crafted React components designed to work with Tailwind CSS",
   "type": "module",
   "main": "dist/index.cjs.js",
