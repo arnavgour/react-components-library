@@ -2,30 +2,6 @@
   "name": "@argojun/react-components",
   "version": "1.0.5",
   "description": "A collection of beautifully crafted React components designed to work with Tailwind CSS",
-  "type": "module",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./tailwind": {
-      "require": "./src/tailwind.preset.cjs"
-    }
-  },
-  "files": [
-    "dist",
-    "src/tailwind.preset.cjs",
-    "README.md"
-  ],
-  "sideEffects": false,
-  "scripts": {
-    "build": "rollup -c",
-    "prepublishOnly": "npm run build"
-  },
   "keywords": [
     "react",
     "components",
@@ -39,25 +15,37 @@
     "datepicker",
     "file-upload"
   ],
-  "author": "Arnav Gour",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/arnavgour/react-components-library.git"
-  },
   "homepage": "https://github.com/arnavgour/react-components-library#readme",
   "bugs": {
     "url": "https://github.com/arnavgour/react-components-library/issues"
   },
-  "peerDependencies": {
-    "react": ">=17.0.0",
-    "react-dom": ">=17.0.0",
-    "tailwindcss": ">=3.0.0"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arnavgour/react-components-library.git"
   },
-  "peerDependenciesMeta": {
-    "tailwindcss": {
-      "optional": false
+  "license": "MIT",
+  "author": "Arnav Gour",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./tailwind": {
+      "require": "./src/tailwind.preset.cjs"
     }
+  },
+  "main": "dist/index.cjs.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src/tailwind.preset.cjs",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "prop-types": "^15.8.1"
@@ -77,5 +65,17 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "tailwindcss": "^3.4.1"
-  }
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0",
+    "tailwindcss": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": false
+    }
+  },
+  "module": "dist/index.esm.js",
+  "sideEffects": false
 }
