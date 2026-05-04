@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback, forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import { getColor, formatNumber, ChartTooltip, ChartLegend, multiColors } from './ChartUtils';
+import { getColor, formatNumber, ChartTooltip, ChartLegend, multiColors, useChartResize, useChartMount, CSS_EASE } from './ChartUtils';
 
 /**
  * RadarChart Component
@@ -36,6 +36,7 @@ const RadarChart = forwardRef(({
   // Dimensions
   width = 300,
   height = 300,
+  responsive = false,
 
   // Tooltip
   showTooltip = true,
@@ -52,27 +53,16 @@ const RadarChart = forwardRef(({
   ...props
 }, ref) => {
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: null });
-  const [animationProgress, setAnimationProgress] = useState(animate ? 0 : 1);
   const [hoveredPoint, setHoveredPoint] = useState(null); // { seriesIndex, categoryIndex }
   const [hiddenSeries, setHiddenSeries] = useState(new Set());
   const containerRef = useRef(null);
+  const mounted = useChartMount(animate);
+  const [resizeRef, chartW, chartH] = useChartResize(responsive, width, height, 300, 300);
+  const widthToUse = chartW;
+  const heightToUse = chartH;
 
-  useEffect(() => {
-    if (animate) {
-      let start;
-      const duration = 800;
-      const step = (timestamp) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / duration, 1);
-        setAnimationProgress(progress);
-        if (progress < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }
-  }, [animate, data]);
-
-  const centerX = width / 2;
-  const centerY = height / 2;
+  const centerX = widthToUse / 2;
+  const centerY = heightToUse / 2;
   const radius = Math.min(centerX, centerY) - 40;
 
   const numCategories = categories.length;
@@ -88,7 +78,7 @@ const RadarChart = forwardRef(({
 
   const getPoint = (categoryIndex, value) => {
     const angle = categoryIndex * angleStep - Math.PI / 2;
-    const r = (value / maxValue) * radius * animationProgress;
+    const r = (value / maxValue) * radius;
     return {
       x: centerX + Math.cos(angle) * r,
       y: centerY + Math.sin(angle) * r
@@ -208,7 +198,13 @@ const RadarChart = forwardRef(({
             fillOpacity={isFilled ? fillOpacity : 0}
             stroke={dataColor}
             strokeWidth={2}
-            className="transition-all duration-300"
+            style={{
+              transform: animate ? (mounted ? 'scale(1)' : 'scale(0)') : 'scale(1)',
+              transformOrigin: `${centerX}px ${centerY}px`,
+              transition: animate
+                ? `transform 0.8s ${CSS_EASE} ${di * 100}ms`
+                : 'none',
+            }}
           />
 
           {(showDots || variant === 'dots') && categories.map((cat, i) => {
@@ -233,7 +229,15 @@ const RadarChart = forwardRef(({
                   fill="white"
                   stroke={dataColor}
                   strokeWidth={2}
-                  className="cursor-pointer transition-all duration-150"
+                  className="cursor-pointer"
+                  style={{
+                    opacity: animate ? (mounted ? 1 : 0) : 1,
+                    transform: animate ? (mounted ? 'scale(1)' : 'scale(0)') : 'scale(1)',
+                    transformOrigin: `${point.x}px ${point.y}px`,
+                    transition: animate
+                      ? `opacity 0.3s ${CSS_EASE} ${di * 100 + 400}ms, transform 0.3s ${CSS_EASE} ${di * 100 + 400}ms, r 0.15s ease`
+                      : 'r 0.15s ease',
+                  }}
                   onMouseMove={(e) => {
                     setHoveredPoint({ seriesIndex: di, categoryIndex: i });
                     if (!showTooltip) return;
@@ -295,10 +299,16 @@ const RadarChart = forwardRef(({
 
   const isLegendSide = legendPosition === 'left' || legendPosition === 'right';
 
+  const wrapperRef = (el) => {
+    containerRef.current = el;
+    if (resizeRef) resizeRef.current = el;
+  };
+
   return (
     <div
-      ref={containerRef}
-      className={`relative ${isLegendSide && shouldShowLegend ? 'flex items-center' : ''} ${className}`}
+      ref={wrapperRef}
+      className={`relative ${responsive ? 'w-full' : ''} ${isLegendSide && shouldShowLegend ? 'flex items-center' : ''} ${className}`}
+      style={responsive ? { minHeight: heightToUse } : undefined}
       {...props}
     >
       {shouldShowLegend && legendPosition === 'top' && (
@@ -308,7 +318,7 @@ const RadarChart = forwardRef(({
         <ChartLegend items={legendItems} position="left" align={legendAlign} shape={legendShape} interactive={legendInteractive} onToggle={handleLegendToggle} layout="vertical" />
       )}
       <div className="relative">
-        <svg ref={ref} width={width} height={height} className="overflow-visible">
+        <svg ref={ref} width={widthToUse} height={heightToUse} viewBox={`0 0 ${widthToUse} ${heightToUse}`} style={{ maxWidth: '100%', height: 'auto' }} className="overflow-visible">
           {renderGrid()}
           {renderLabels()}
           {renderData()}
@@ -341,6 +351,7 @@ RadarChart.propTypes = {
   levels: PropTypes.number,
   width: PropTypes.number,
   height: PropTypes.number,
+  responsive: PropTypes.bool,
   showTooltip: PropTypes.bool,
   tooltipFormatter: PropTypes.func,
   showLegend: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['auto'])]),

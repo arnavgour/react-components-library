@@ -1,6 +1,6 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useRef, forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import { getColor } from './ChartUtils';
+import { getColor, useChartResize, useChartMount, CSS_EASE } from './ChartUtils';
 
 /**
  * SparklineChart Component
@@ -35,44 +35,41 @@ const SparklineChart = forwardRef(({
   // Dimensions
   width = 100,
   height = 30,
-  
+  responsive = false,
+
   className = '',
   ...props
 }, ref) => {
-  const [animationProgress, setAnimationProgress] = useState(animate ? 0 : 1);
-
-  useEffect(() => {
-    if (animate) {
-      const timer = setTimeout(() => setAnimationProgress(1), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [animate, data]);
+  const mounted = useChartMount(animate);
+  const clipId = useRef(`spark-clip-${Math.random().toString(36).substr(2, 9)}`).current;
+  const [resizeRef, chartW, chartH] = useChartResize(responsive, width, height, 100, 30);
+  const widthToUse = chartW;
+  const heightToUse = chartH;
 
   if (!data.length) return null;
 
   const maxValue = Math.max(...data);
   const minValue = Math.min(...data);
   const range = maxValue - minValue || 1;
-  const padding = height * 0.1;
+  const padding = heightToUse * 0.1;
 
   const getY = (value) => {
-    return height - padding - ((value - minValue) / range) * (height - padding * 2);
+    return heightToUse - padding - ((value - minValue) / range) * (heightToUse - padding * 2);
   };
 
   const points = data.map((value, i) => {
-    const x = (i / (data.length - 1)) * width;
+    const x = (i / (data.length - 1)) * widthToUse;
     const y = getY(value);
     return { x, y, value };
   });
 
-  const visiblePoints = points.slice(0, Math.ceil(points.length * animationProgress) || 1);
   const primaryColor = getColor(color, 0);
 
   // Generate line path
-  const linePath = visiblePoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
   
   // Generate area path
-  const areaPath = `${linePath} L ${visiblePoints[visiblePoints.length - 1]?.x || 0} ${height} L 0 ${height} Z`;
+  const areaPath = `${linePath} L ${points[points.length - 1]?.x || 0} ${heightToUse} L 0 ${heightToUse} Z`;
 
   // Find min/max indices
   const minIndex = data.indexOf(minValue);
@@ -82,15 +79,15 @@ const SparklineChart = forwardRef(({
   const renderContent = () => {
     switch (variant) {
       case 'bar':
-        const barWidth = (width / data.length) * 0.8;
-        const barGap = (width / data.length) * 0.2;
-        return data.slice(0, Math.ceil(data.length * animationProgress)).map((value, i) => {
-          const barHeight = ((value - minValue) / range) * (height - padding * 2);
+        const barWidth = (widthToUse / data.length) * 0.8;
+        const barGap = (widthToUse / data.length) * 0.2;
+        return data.map((value, i) => {
+          const barHeight = ((value - minValue) / range) * (heightToUse - padding * 2);
           return (
             <rect
               key={i}
               x={i * (barWidth + barGap)}
-              y={height - barHeight - padding}
+              y={heightToUse - barHeight - padding}
               width={barWidth}
               height={barHeight}
               fill={primaryColor}
@@ -101,7 +98,7 @@ const SparklineChart = forwardRef(({
         });
         
       case 'dots':
-        return visiblePoints.map((point, i) => (
+        return points.map((point, i) => (
           <circle
             key={i}
             cx={point.x}
@@ -137,14 +134,38 @@ const SparklineChart = forwardRef(({
     }
   };
 
-  return (
-    <svg ref={ref} width={width} height={height} className={className} {...props}>
+  const isBarVariant = variant === 'bar';
+
+  const svgEl = (
+    <svg ref={ref} width={widthToUse} height={heightToUse} viewBox={`0 0 ${widthToUse} ${heightToUse}`} style={{ maxWidth: '100%', height: 'auto' }} className={className} {...props}>
+      {animate && (
+        <defs>
+          <clipPath id={clipId}>
+            <rect
+              x={0}
+              y={0}
+              width={widthToUse}
+              height={heightToUse}
+              style={{
+                transform: mounted
+                  ? (isBarVariant ? 'scaleY(1)' : 'scaleX(1)')
+                  : (isBarVariant ? 'scaleY(0)' : 'scaleX(0)'),
+                transformOrigin: isBarVariant
+                  ? `${widthToUse / 2}px ${heightToUse}px`
+                  : '0 0',
+                transition: `transform 0.6s ${CSS_EASE}`,
+              }}
+            />
+          </clipPath>
+        </defs>
+      )}
+
       {/* Reference line */}
       {showReference && referenceValue !== null && (
         <line
           x1={0}
           y1={getY(referenceValue)}
-          x2={width}
+          x2={widthToUse}
           y2={getY(referenceValue)}
           stroke="currentColor"
           strokeWidth={1}
@@ -153,29 +174,38 @@ const SparklineChart = forwardRef(({
         />
       )}
       
-      {renderContent()}
+      <g clipPath={animate ? `url(#${clipId})` : undefined}>
+        {renderContent()}
+      </g>
       
       {/* Min/Max indicators */}
       {showMinMax && variant !== 'bar' && (
-        <>
+        <g clipPath={animate ? `url(#${clipId})` : undefined}>
           <circle
             cx={points[minIndex]?.x}
             cy={points[minIndex]?.y}
             r={3}
             fill="#ef4444"
-            className="transition-all duration-300"
           />
           <circle
             cx={points[maxIndex]?.x}
             cy={points[maxIndex]?.y}
             r={3}
             fill="#22c55e"
-            className="transition-all duration-300"
           />
-        </>
+        </g>
       )}
     </svg>
   );
+
+  if (responsive) {
+    return (
+      <div ref={resizeRef} className={`w-full ${className}`} style={{ minHeight: heightToUse }}>
+        {svgEl}
+      </div>
+    );
+  }
+  return svgEl;
 });
 
 SparklineChart.displayName = 'SparklineChart';
@@ -192,6 +222,7 @@ SparklineChart.propTypes = {
   showMinMax: PropTypes.bool,
   width: PropTypes.number,
   height: PropTypes.number,
+  responsive: PropTypes.bool,
   className: PropTypes.string,
 };
 

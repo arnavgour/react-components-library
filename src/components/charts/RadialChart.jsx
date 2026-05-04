@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import { getColor, formatNumber, colorPalettes, ChartLegend } from './ChartUtils';
+import { getColor, formatNumber, colorPalettes, ChartLegend, useChartResize, useChartMount, CSS_EASE } from './ChartUtils';
 
 /**
  * RadialChart Component
@@ -37,51 +37,23 @@ const RadialChart = forwardRef(({
 
   // Dimensions
   size = 150,
+  responsive = false,
 
   className = '',
   ...props
 }, ref) => {
-  const [animationProgress, setAnimationProgress] = useState(animate ? 0 : 1);
+  const mounted = useChartMount(animate);
+  const [resizeRef, chartW, chartH] = useChartResize(responsive, size, size, 150, 150);
+  const sizeToUse = responsive ? Math.min(chartW, chartH) : size;
 
   const isMulti = variant === 'multi' && data.length > 0;
   const isSemi = variant === 'semi';
   const isGauge = variant === 'gauge';
 
-  const center = size / 2;
+  const center = sizeToUse / 2;
 
   // Memoize primary color to prevent recalculation on every render
   const primaryColor = useMemo(() => getColor(color, 0), [color]);
-
-  // Create a stable key for value/data changes to reset animation
-  const animationKey = useMemo(() => {
-    if (isMulti) {
-      return JSON.stringify(data.map(d => ({ value: d[valueKey], name: d[nameKey] })));
-    }
-    return `${value}-${maxValue}`;
-  }, [isMulti, data, valueKey, nameKey, value, maxValue]);
-
-  useEffect(() => {
-    if (animate) {
-      setAnimationProgress(0);
-      let start;
-      let animationFrame;
-      const duration = 1000;
-      const step = (timestamp) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / duration, 1);
-        setAnimationProgress(progress);
-        if (progress < 1) {
-          animationFrame = requestAnimationFrame(step);
-        }
-      };
-      animationFrame = requestAnimationFrame(step);
-      return () => {
-        if (animationFrame) cancelAnimationFrame(animationFrame);
-      };
-    } else {
-      setAnimationProgress(1);
-    }
-  }, [animate, animationKey]);
 
   // Get color shades for multi variant
   const getBarColor = (index) => {
@@ -92,17 +64,19 @@ const RadialChart = forwardRef(({
 
   // Single radial progress
   const renderSingleRadial = () => {
-    const radius = (size - strokeWidth) / 2;
+    const radius = (sizeToUse - strokeWidth) / 2;
     const circumference = isSemi ? Math.PI * radius : 2 * Math.PI * radius;
     const percentage = Math.min((value / maxValue) * 100, 100);
-    const strokeDashoffset = circumference - (percentage / 100) * circumference * animationProgress;
+    const finalOffset = circumference - (percentage / 100) * circumference;
+    const strokeDashoffset = animate ? (mounted ? finalOffset : circumference) : finalOffset;
 
     return (
       <>
         <svg
-          width={size}
-          height={isSemi ? size / 2 + 20 : size}
-          style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+          width={sizeToUse}
+          height={isSemi ? sizeToUse / 2 + 20 : sizeToUse}
+          viewBox={`0 0 ${sizeToUse} ${isSemi ? sizeToUse / 2 + 20 : sizeToUse}`}
+          style={{ maxWidth: '100%', height: 'auto', transform: 'rotate(-90deg)', transformOrigin: 'center' }}
         >
           {/* Background circle */}
           <circle
@@ -128,7 +102,7 @@ const RadialChart = forwardRef(({
             strokeDasharray={`${circumference} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
             style={{
-              transition: animationProgress >= 1 ? 'stroke-dashoffset 0.3s ease' : 'none'
+              transition: `stroke-dashoffset 0.9s ${CSS_EASE}`,
             }}
           />
         </svg>
@@ -154,9 +128,10 @@ const RadialChart = forwardRef(({
     return (
       <>
         <svg
-          width={size}
-          height={size}
-          style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+          width={sizeToUse}
+          height={sizeToUse}
+          viewBox={`0 0 ${sizeToUse} ${sizeToUse}`}
+          style={{ maxWidth: '100%', height: 'auto', transform: 'rotate(-90deg)', transformOrigin: 'center' }}
         >
           {data.map((item, i) => {
             const radius = center - strokeWidth / 2 - i * (strokeWidth + gap) - 10;
@@ -165,7 +140,8 @@ const RadialChart = forwardRef(({
             const circumference = 2 * Math.PI * radius;
             const itemValue = item[valueKey] || 0;
             const percentage = Math.min((itemValue / totalMax) * 100, 100);
-            const strokeDashoffset = circumference - (percentage / 100) * circumference * animationProgress;
+            const finalOffset = circumference - (percentage / 100) * circumference;
+            const strokeDashoffset = animate ? (mounted ? finalOffset : circumference) : finalOffset;
             const itemColor = getBarColor(i);
 
             return (
@@ -193,7 +169,7 @@ const RadialChart = forwardRef(({
                   strokeDasharray={`${circumference} ${circumference}`}
                   strokeDashoffset={strokeDashoffset}
                   style={{
-                    transition: animationProgress >= 1 ? 'stroke-dashoffset 0.3s ease' : 'none'
+                    transition: `stroke-dashoffset 0.9s ${CSS_EASE} ${i * 100}ms`,
                   }}
                 />
               </g>
@@ -215,9 +191,9 @@ const RadialChart = forwardRef(({
 
   // Gauge variant
   const renderGauge = () => {
-    const radius = (size - strokeWidth) / 2 - 10;
-    const gaugeHeight = size; // Full height for better visibility
-    const gaugeCenterX = size / 2;
+    const radius = (sizeToUse - strokeWidth) / 2 - 10;
+    const gaugeHeight = sizeToUse; // Full height for better visibility
+    const gaugeCenterX = sizeToUse / 2;
     // Position center so the gauge arc is properly visible
     const gaugeCenterY = gaugeHeight * 0.6;
 
@@ -226,7 +202,9 @@ const RadialChart = forwardRef(({
     const totalAngle = endAngle - startAngle;
 
     const percentage = Math.min((value / maxValue) * 100, 100);
-    const valueAngle = startAngle + (percentage / 100) * totalAngle * animationProgress;
+    const valueAngle = animate
+      ? (mounted ? startAngle + (percentage / 100) * totalAngle : startAngle)
+      : startAngle + (percentage / 100) * totalAngle;
 
     // Arc path - use gauge-specific center coordinates
     const polarToCartesian = (angle, r) => ({
@@ -250,7 +228,7 @@ const RadialChart = forwardRef(({
 
     return (
       <>
-        <svg width={size} height={gaugeHeight}>
+        <svg width={sizeToUse} height={gaugeHeight} viewBox={`0 0 ${sizeToUse} ${gaugeHeight}`} style={{ maxWidth: '100%', height: 'auto' }}>
           {/* Background arc */}
           <path
             d={bgPath}
@@ -268,7 +246,7 @@ const RadialChart = forwardRef(({
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             style={{
-              transition: animationProgress >= 1 ? 'd 0.3s ease' : 'none'
+              transition: `d 0.9s ${CSS_EASE}`,
             }}
           />
 
@@ -282,7 +260,7 @@ const RadialChart = forwardRef(({
             strokeWidth={3}
             strokeLinecap="round"
             style={{
-              transition: animationProgress >= 1 ? 'x2 0.3s ease, y2 0.3s ease' : 'none'
+              transition: `x2 0.9s ${CSS_EASE}, y2 0.9s ${CSS_EASE}`,
             }}
           />
           <circle
@@ -331,8 +309,19 @@ const RadialChart = forwardRef(({
     );
   };
 
+  const wrapperRef = (el) => {
+    if (resizeRef) resizeRef.current = el;
+    if (typeof ref === 'function') ref(el);
+    else if (ref) ref.current = el;
+  };
+
   return (
-    <div ref={ref} className={`relative inline-flex flex-col items-center justify-center ${className}`} {...props}>
+    <div
+      ref={responsive ? wrapperRef : ref}
+      className={`relative inline-flex flex-col items-center justify-center ${responsive ? 'w-full' : ''} ${className}`}
+      style={responsive ? { minHeight: sizeToUse } : undefined}
+      {...props}
+    >
       {isMulti && renderMultiRadial()}
       {isGauge && renderGauge()}
       {!isMulti && !isGauge && renderSingleRadial()}
@@ -359,6 +348,7 @@ RadialChart.propTypes = {
   valueFormatter: PropTypes.func,
   animate: PropTypes.bool,
   size: PropTypes.number,
+  responsive: PropTypes.bool,
   className: PropTypes.string,
 };
 

@@ -1,8 +1,83 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 
 /**
  * Shared utilities for all chart components
  */
+
+/** Default duration (ms) for initial load animation - used across all charts for consistent UX */
+export const CHART_ANIMATION_DURATION = 900;
+
+/** Easing: ease-out cubic for smooth deceleration at end */
+export const easeOutCubic = (t) => 1 - (1 - t) ** 3;
+
+/** Easing: ease-out expo for very satisfying deceleration */
+export const easeOutExpo = (t) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+
+/** CSS easing curves for chart animations */
+export const CSS_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'; // smooth ease-out expo
+
+/**
+ * Hook: triggers a single boolean toggle after mount so CSS transitions can drive the animation.
+ * Returns `true` once the component is ready to animate (after first paint).
+ * This means exactly ONE re-render, then the browser's GPU handles all interpolation.
+ */
+export const useChartMount = (animate) => {
+  const [mounted, setMounted] = useState(!animate);
+  const rafRef = useRef({ outer: 0, inner: 0 });
+  useEffect(() => {
+    if (!animate) return;
+    // Use double-rAF to ensure the initial un-animated frame is painted first
+    rafRef.current.outer = requestAnimationFrame(() => {
+      rafRef.current.inner = requestAnimationFrame(() => {
+        setMounted(true);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(rafRef.current.outer);
+      cancelAnimationFrame(rafRef.current.inner);
+    };
+  }, [animate]);
+  return mounted;
+};
+
+/**
+ * Hook: measure container and return dimensions for responsive charts.
+ * When responsive is true, returns [containerRef, width, height] updating on resize.
+ * When responsive is false, returns [null, propWidth, propHeight] (no container).
+ */
+export const useChartResize = (responsive, propWidth, propHeight, defaultWidth = 400, defaultHeight = 300) => {
+  const containerRef = useRef(null);
+  const [size, setSize] = useState({
+    width: propWidth ?? defaultWidth,
+    height: propHeight ?? defaultHeight,
+  });
+
+  useEffect(() => {
+    if (!responsive) {
+      setSize({ width: propWidth ?? defaultWidth, height: propHeight ?? defaultHeight });
+      return;
+    }
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      const w = Math.max(1, Math.floor(rect.width));
+      const h = Math.max(1, Math.floor(rect.height));
+      setSize(prev => (prev.width !== w || prev.height !== h ? { width: w, height: h } : prev));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [responsive, propWidth, propHeight, defaultWidth, defaultHeight]);
+
+  if (!responsive) {
+    const w = propWidth ?? defaultWidth;
+    const h = propHeight ?? defaultHeight;
+    return [null, w, h];
+  }
+  return [containerRef, size.width, size.height];
+};
 
 // Color palettes - each with shades from dark to light
 export const colorPalettes = {

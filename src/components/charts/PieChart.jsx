@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback, forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import { colorPalettes, formatNumber, ChartTooltip, ChartLegend } from './ChartUtils';
+import { colorPalettes, formatNumber, ChartTooltip, ChartLegend, useChartResize, useChartMount, CSS_EASE } from './ChartUtils';
 
 /**
  * PieChart Component
@@ -41,6 +41,7 @@ const PieChart = forwardRef(({
   // Dimensions
   width = 300,
   height = 300,
+  responsive = false,
 
   // Tooltip
   showTooltip = true,
@@ -57,24 +58,13 @@ const PieChart = forwardRef(({
   ...props
 }, ref) => {
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: null });
-  const [animationProgress, setAnimationProgress] = useState(animate ? 0 : 1);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [hiddenSlices, setHiddenSlices] = useState(new Set());
   const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (animate) {
-      let start;
-      const duration = 1000;
-      const step = (timestamp) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / duration, 1);
-        setAnimationProgress(progress);
-        if (progress < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }
-  }, [animate, data]);
+  const mounted = useChartMount(animate);
+  const [resizeRef, chartW, chartH] = useChartResize(responsive, width, height, 300, 300);
+  const widthToUse = chartW;
+  const heightToUse = chartH;
 
   // Filter visible data
   const visibleData = data.filter((_, i) => !hiddenSlices.has(i));
@@ -89,8 +79,8 @@ const PieChart = forwardRef(({
   // When legend is on the side, reduce the chart size to fit within the same total width
   // Reserve space for the legend (approximately 120px for the legend width)
   const legendSideWidth = isLegendSide ? 120 : 0;
-  const effectiveWidth = isLegendSide ? Math.max(width - legendSideWidth, 100) : width;
-  const effectiveHeight = isLegendSide ? Math.min(height, effectiveWidth) : height;
+  const effectiveWidth = isLegendSide ? Math.max(widthToUse - legendSideWidth, 100) : widthToUse;
+  const effectiveHeight = isLegendSide ? Math.min(heightToUse, effectiveWidth) : heightToUse;
 
   const legendHeight = showLegend && (legendPosition === 'bottom' || legendPosition === 'top') ? 50 : 0;
   const centerX = effectiveWidth / 2;
@@ -122,7 +112,7 @@ const PieChart = forwardRef(({
       }
 
       const value = item[valueKey] || 0;
-      const angle = total > 0 ? (value / total) * totalAngle * animationProgress : 0;
+      const angle = total > 0 ? (value / total) * totalAngle : 0;
       const sliceStartAngle = currentAngle;
       const sliceEndAngle = currentAngle + angle;
       currentAngle = sliceEndAngle;
@@ -150,7 +140,7 @@ const PieChart = forwardRef(({
         hidden: false,
       };
     });
-  }, [data, valueKey, total, animationProgress, color, isSemi, isRose, isExploded, baseRadius, innerRadius, hiddenSlices]);
+  }, [data, valueKey, total, color, isSemi, isRose, isExploded, baseRadius, innerRadius, hiddenSlices]);
 
   // Generate arc path
   const describeArc = (startAngle, endAngle, outerR, innerR = 0, cx = centerX, cy = centerY) => {
@@ -288,10 +278,16 @@ const PieChart = forwardRef(({
     inactive: hiddenSlices.has(i),
   }));
 
+  const wrapperRef = (el) => {
+    containerRef.current = el;
+    if (resizeRef) resizeRef.current = el;
+  };
+
   return (
     <div
-      ref={containerRef}
-      className={`relative ${isLegendSide && showLegend ? 'flex items-center justify-center' : 'flex flex-col items-center'} ${className}`}
+      ref={wrapperRef}
+      className={`relative ${responsive ? 'w-full' : ''} ${isLegendSide && showLegend ? 'flex items-center justify-center' : 'flex flex-col items-center'} ${className}`}
+      style={responsive ? { minHeight: heightToUse } : undefined}
       {...props}
     >
       {showLegend && legendPosition === 'top' && (
@@ -301,7 +297,7 @@ const PieChart = forwardRef(({
         <ChartLegend items={legendItems} position="left" align={legendAlign} shape={legendShape} interactive={legendInteractive} onToggle={handleLegendToggle} layout="vertical" />
       )}
       <div className="relative flex-shrink-0">
-        <svg ref={ref} width={effectiveWidth} height={effectiveHeight} className="overflow-hidden">
+        <svg ref={ref} width={effectiveWidth} height={effectiveHeight} viewBox={`0 0 ${effectiveWidth} ${effectiveHeight}`} style={{ maxWidth: '100%', height: 'auto' }} className="overflow-hidden">
           {slices.filter(s => !s.hidden).map((slice, i) => {
             const originalIndex = data.indexOf(slice.item);
             const isHovered = hoveredIndex === originalIndex;
@@ -316,9 +312,15 @@ const PieChart = forwardRef(({
                 key={originalIndex}
                 d={describeArc(slice.startAngle, slice.endAngle, outerR, innerR, cx, cy)}
                 fill={slice.color}
-                className="cursor-pointer transition-all duration-200"
+                className="cursor-pointer"
                 style={{
-                  filter: isHovered ? 'brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.15))' : 'none'
+                  filter: isHovered ? 'brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.15))' : 'none',
+                  opacity: animate ? (mounted ? 1 : 0) : 1,
+                  transform: animate ? (mounted ? 'scale(1)' : 'scale(0.8)') : 'scale(1)',
+                  transformOrigin: `${centerX}px ${centerY}px`,
+                  transition: animate
+                    ? `opacity 0.5s ${CSS_EASE} ${i * 60}ms, transform 0.6s ${CSS_EASE} ${i * 60}ms, filter 0.2s ease`
+                    : 'filter 0.2s ease',
                 }}
                 onMouseMove={(e) => handleMouseMove(e, slice, originalIndex)}
                 onMouseLeave={handleMouseLeave}
@@ -358,6 +360,7 @@ PieChart.propTypes = {
   centerContent: PropTypes.node,
   width: PropTypes.number,
   height: PropTypes.number,
+  responsive: PropTypes.bool,
   showTooltip: PropTypes.bool,
   tooltipFormatter: PropTypes.func,
   showLegend: PropTypes.bool,

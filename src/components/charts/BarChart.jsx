@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback, forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import { getColor, formatNumber, ChartTooltip, ChartLegend, multiColors } from './ChartUtils';
+import { getColor, formatNumber, ChartTooltip, ChartLegend, multiColors, useChartResize, useChartMount, CSS_EASE } from './ChartUtils';
 
 /**
  * BarChart Component
@@ -37,6 +37,7 @@ const BarChart = forwardRef(({
   // Dimensions
   width = 400,
   height = 300,
+  responsive = false,
   barWidth = 0.7,
   gap = 0.1,
 
@@ -63,24 +64,22 @@ const BarChart = forwardRef(({
   ...props
 }, ref) => {
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: null });
-  const [animationProgress, setAnimationProgress] = useState(animate ? 0 : 1);
   const [hoveredBarIndex, setHoveredBarIndex] = useState(-1);
   const [hiddenSeries, setHiddenSeries] = useState(new Set());
   const containerRef = useRef(null);
+  const mounted = useChartMount(animate);
+  const clipId = useRef(`bar-clip-${Math.random().toString(36).substr(2, 9)}`).current;
 
-  useEffect(() => {
-    if (animate) {
-      const timer = setTimeout(() => setAnimationProgress(1), 50);
-      return () => clearTimeout(timer);
-    }
-  }, [animate, data]);
+  const [resizeRef, chartW, chartH] = useChartResize(responsive, width, height, 400, 300);
+  const widthToUse = chartW;
+  const heightToUse = chartH;
 
   // Handle horizontal variant dimensions
   const isHorizontal = variant === 'horizontal';
   const chartWidth = isHorizontal
-    ? width - (showYAxis ? 80 : 0)
-    : width - (showYAxis ? yAxisWidth : 0);
-  const chartHeight = height - (showXAxis ? xAxisHeight : 0);
+    ? widthToUse - (showYAxis ? 80 : 0)
+    : widthToUse - (showYAxis ? yAxisWidth : 0);
+  const chartHeight = heightToUse - (showXAxis ? xAxisHeight : 0);
   const chartX = isHorizontal ? (showYAxis ? 80 : 0) : (showYAxis ? yAxisWidth : 0);
 
   // Get all y keys for stacked/grouped charts
@@ -169,7 +168,7 @@ const BarChart = forwardRef(({
     } else {
       tipX = chartX + barGap + nearestIndex * (totalBarWidth + barGap) + totalBarWidth / 2;
       const maxBarValue = Math.max(...activeKeys.map(key => item[key] || 0));
-      tipY = chartHeight - (maxBarValue / maxValue) * chartHeight * animationProgress;
+      tipY = chartHeight - (maxBarValue / maxValue) * chartHeight;
     }
 
     setTooltip({
@@ -178,7 +177,7 @@ const BarChart = forwardRef(({
       y: tipY,
       content,
     });
-  }, [data, chartX, chartWidth, chartHeight, totalBarWidth, barGap, isHorizontal, yKeys, xKey, showTooltip, tooltipFormatter, maxValue, animationProgress, hoveredBarIndex, hiddenSeries]);
+  }, [data, chartX, chartWidth, chartHeight, totalBarWidth, barGap, isHorizontal, yKeys, xKey, showTooltip, tooltipFormatter, maxValue, hoveredBarIndex, hiddenSeries]);
 
   const handleChartMouseLeave = useCallback(() => {
     setHoveredBarIndex(-1);
@@ -236,7 +235,7 @@ const BarChart = forwardRef(({
               <line
                 x1={chartX}
                 y1={chartHeight - (tick / maxValue) * chartHeight}
-                x2={width}
+                x2={widthToUse}
                 y2={chartHeight - (tick / maxValue) * chartHeight}
                 className="stroke-slate-200 dark:stroke-slate-700"
                 strokeDasharray="4,4"
@@ -255,7 +254,7 @@ const BarChart = forwardRef(({
         {xAxisLabel && !isHorizontal && (
           <text
             x={chartX + chartWidth / 2}
-            y={height + 12}
+            y={heightToUse + 12}
             textAnchor="middle"
             className="text-[11px] fill-slate-600 dark:fill-slate-400 font-medium"
           >
@@ -276,7 +275,7 @@ const BarChart = forwardRef(({
         {xAxisLabel && isHorizontal && (
           <text
             x={chartX + chartWidth / 2}
-            y={height + 12}
+            y={heightToUse + 12}
             textAnchor="middle"
             className="text-[11px] fill-slate-600 dark:fill-slate-400 font-medium"
           >
@@ -359,7 +358,7 @@ const BarChart = forwardRef(({
       if (isHorizontal) {
         const y = barGap + i * (totalBarWidth + barGap) + barOffset;
         const value = item[yKeys[0]] || 0;
-        const barLength = (value / maxValue) * chartWidth * animationProgress;
+        const barLength = (value / maxValue) * chartWidth;
 
         return (
           <rect
@@ -380,29 +379,76 @@ const BarChart = forwardRef(({
 
       if (variant === 'stacked' && isMultiSeries) {
         let currentY = 0;
-        // Find the last visible key index to apply rounded corners only to the topmost bar
         const visibleKeyIndices = yKeys.map((_, ki) => ki).filter(ki => !hiddenSeries.has(ki));
+        const firstVisibleKeyIndex = visibleKeyIndices[0];
         const lastVisibleKeyIndex = visibleKeyIndices.length > 0 ? visibleKeyIndices[visibleKeyIndices.length - 1] : -1;
+        const r = rounded ? Math.min(barRadius, actualBarWidth / 2) : 0;
 
         return yKeys.map((key, ki) => {
           if (hiddenSeries.has(ki)) return null;
           const value = item[key] || 0;
-          const barHeight = (value / maxValue) * chartHeight * animationProgress;
+          const barHeight = (value / maxValue) * chartHeight;
           const y = chartHeight - currentY - barHeight;
           currentY += barHeight;
 
-          // Only the topmost visible bar gets rounded corners
+          const isFirstVisible = ki === firstVisibleKeyIndex;
           const isLastVisible = ki === lastVisibleKeyIndex;
+          const w = actualBarWidth;
+          const h = barHeight;
 
+          // Paths: only round outer edges (bottom of bottom segment, top of top segment); no rounding between segments
+          if (isFirstVisible && isLastVisible) {
+            // Single visible segment: round both top and bottom
+            return (
+              <rect
+                key={`${i}-${ki}`}
+                x={x}
+                y={y}
+                width={w}
+                height={h}
+                fill={getBarColor(i, ki)}
+                rx={rounded ? barRadius : 0}
+                opacity={hoverOpacity}
+                className="transition-all duration-200 cursor-pointer"
+              />
+            );
+          }
+          if (isLastVisible && rounded && r > 0) {
+            // Top segment: round only top two corners
+            const path = `M ${x + r},${y} L ${x + w - r},${y} A ${r} ${r} 0 0 1 ${x + w},${y + r} L ${x + w},${y + h} L ${x},${y + h} L ${x},${y + r} A ${r} ${r} 0 0 1 ${x + r},${y} Z`;
+            return (
+              <path
+                key={`${i}-${ki}`}
+                d={path}
+                fill={getBarColor(i, ki)}
+                opacity={hoverOpacity}
+                className="transition-all duration-200 cursor-pointer"
+              />
+            );
+          }
+          if (isFirstVisible && rounded && r > 0) {
+            // Bottom segment: round only bottom two corners (sweep 0 = counter-clockwise = bulge outward)
+            const path = `M ${x},${y} L ${x},${y + h - r} A ${r} ${r} 0 0 0 ${x + r},${y + h} L ${x + w - r},${y + h} A ${r} ${r} 0 0 0 ${x + w},${y + h - r} L ${x + w},${y} L ${x},${y} Z`;
+            return (
+              <path
+                key={`${i}-${ki}`}
+                d={path}
+                fill={getBarColor(i, ki)}
+                opacity={hoverOpacity}
+                className="transition-all duration-200 cursor-pointer"
+              />
+            );
+          }
+          // Middle segment: no rounding
           return (
             <rect
               key={`${i}-${ki}`}
               x={x}
               y={y}
-              width={actualBarWidth}
-              height={barHeight}
+              width={w}
+              height={h}
               fill={getBarColor(i, ki)}
-              rx={isLastVisible && rounded ? barRadius : 0}
+              rx={0}
               opacity={hoverOpacity}
               className="transition-all duration-200 cursor-pointer"
             />
@@ -417,7 +463,7 @@ const BarChart = forwardRef(({
         return yKeys.map((key, ki) => {
           if (hiddenSeries.has(ki)) return null;
           const value = item[key] || 0;
-          const barHeight = (value / maxValue) * chartHeight * animationProgress;
+          const barHeight = (value / maxValue) * chartHeight;
           const barX = x + activeIndex * groupBarWidth;
           activeIndex++;
 
@@ -439,7 +485,7 @@ const BarChart = forwardRef(({
 
       // Default single bar
       const value = item[yKeys[0]] || 0;
-      const barHeight = (value / maxValue) * chartHeight * animationProgress;
+      const barHeight = (value / maxValue) * chartHeight;
 
       return (
         <g key={i}>
@@ -496,10 +542,16 @@ const BarChart = forwardRef(({
 
   const isLegendSide = legendPosition === 'left' || legendPosition === 'right';
 
+  const wrapperRef = (el) => {
+    containerRef.current = el;
+    if (resizeRef) resizeRef.current = el;
+  };
+
   return (
     <div
-      ref={containerRef}
-      className={`relative ${isLegendSide && shouldShowLegend ? 'flex items-center' : ''} ${className}`}
+      ref={wrapperRef}
+      className={`relative ${responsive ? 'w-full' : ''} ${isLegendSide && shouldShowLegend ? 'flex items-center' : ''} ${className}`}
+      style={responsive ? { minHeight: heightToUse } : undefined}
       {...props}
     >
       {shouldShowLegend && legendPosition === 'top' && (
@@ -509,21 +561,42 @@ const BarChart = forwardRef(({
         <ChartLegend items={legendItems} position="left" align={legendAlign} shape={legendShape} interactive={legendInteractive} onToggle={handleLegendToggle} layout="vertical" />
       )}
       <div className="relative">
-        <svg ref={ref} width={width} height={height} className="overflow-visible">
-          {variant === 'gradient' && (
-            <defs>
+        <svg ref={ref} width={widthToUse} height={heightToUse} viewBox={`0 0 ${widthToUse} ${heightToUse}`} style={{ maxWidth: '100%', height: 'auto' }} className="overflow-visible">
+          <defs>
+            {variant === 'gradient' && (
               <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor={getColor(color, 0)} />
                 <stop offset="100%" stopColor={getColor(color, 2)} />
               </linearGradient>
-            </defs>
-          )}
+            )}
+            {animate && (
+              <clipPath id={clipId}>
+                <rect
+                  x={isHorizontal ? chartX : 0}
+                  y={0}
+                  width={isHorizontal ? chartWidth : widthToUse}
+                  height={chartHeight}
+                  style={{
+                    transform: mounted
+                      ? (isHorizontal ? 'scaleX(1)' : 'scaleY(1)')
+                      : (isHorizontal ? 'scaleX(0)' : 'scaleY(0)'),
+                    transformOrigin: isHorizontal
+                      ? `${chartX}px ${chartHeight / 2}px`
+                      : `${widthToUse / 2}px ${chartHeight}px`,
+                    transition: `transform 0.85s ${CSS_EASE}`,
+                  }}
+                />
+              </clipPath>
+            )}
+          </defs>
 
           {renderYAxis()}
           {renderXAxis()}
           {renderAxisLabels()}
-          {renderHoverHighlight()}
-          {renderBars()}
+          <g clipPath={animate ? `url(#${clipId})` : undefined}>
+            {renderHoverHighlight()}
+            {renderBars()}
+          </g>
 
           {/* Invisible overlay for mouse tracking */}
           <rect
@@ -565,6 +638,7 @@ BarChart.propTypes = {
   barRadius: PropTypes.number,
   width: PropTypes.number,
   height: PropTypes.number,
+  responsive: PropTypes.bool,
   barWidth: PropTypes.number,
   gap: PropTypes.number,
   showXAxis: PropTypes.bool,

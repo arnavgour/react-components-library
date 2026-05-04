@@ -135,15 +135,15 @@ const Textarea = forwardRef(({
     // Theme configurations (matching Input)
     const themeConfig = {
         default: {
-            wrapper: 'bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 shadow-sm',
+            wrapper: 'bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700',
             textarea: 'bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500',
-            focus: 'focus-within:ring-1 focus-within:bg-white dark:focus-within:bg-slate-950',
+            focus: 'focus-within:ring-2 focus-within:bg-white dark:focus-within:bg-slate-950',
             disabled: 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-900'
         },
         glass: {
             wrapper: 'bg-white/60 dark:bg-slate-800/30 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/30 shadow-sm',
             textarea: 'bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400/50',
-            focus: 'focus-within:ring-1 focus-within:bg-white/80 dark:focus-within:bg-slate-800/40',
+            focus: 'focus-within:ring-2 focus-within:bg-white/80 dark:focus-within:bg-slate-800/40',
             disabled: 'opacity-40 cursor-not-allowed'
         },
         minimal: {
@@ -161,13 +161,13 @@ const Textarea = forwardRef(({
         filled: {
             wrapper: 'bg-slate-100 dark:bg-slate-800 border-2 border-transparent',
             textarea: 'bg-transparent text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400',
-            focus: 'focus-within:bg-white dark:focus-within:bg-slate-700 focus-within:ring-1',
+            focus: 'focus-within:bg-white dark:focus-within:bg-slate-700 focus-within:ring-2',
             disabled: 'opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-900'
         },
         gradient: {
             wrapper: 'bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800/50 dark:via-slate-700/50 dark:to-slate-800/50 border border-slate-200/50 dark:border-slate-600/30 backdrop-blur-sm',
             textarea: 'bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400',
-            focus: 'focus-within:ring-1',
+            focus: 'focus-within:ring-2',
             disabled: 'opacity-50 cursor-not-allowed'
         }
     };

@@ -53,7 +53,7 @@ const Select = forwardRef(({
     color = 'violet', // violet, blue, emerald, rose, amber, black
     size = 'md',
     rounded = 'xl',
-    fullWidth = false,
+    fullWidth = true,
 
     // Label & Help
     label,
@@ -296,37 +296,43 @@ const Select = forwardRef(({
     // Color Configuration
     const colorConfig = {
         violet: {
-            focus: 'border-violet-500 ring-violet-500/20 dark:ring-violet-500/90',
+            focus: 'border-violet-500 ring-violet-500/20',
+            keyboardFocus: 'focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500',
             optionSelected: 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300',
             icon: 'text-violet-500',
             iconSelected: 'text-violet-500'
         },
         blue: {
-            focus: 'border-blue-500 ring-blue-500/90',
+            focus: 'border-blue-500 ring-blue-500/20',
+            keyboardFocus: 'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
             optionSelected: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
             icon: 'text-blue-500',
             iconSelected: 'text-blue-500'
         },
         emerald: {
-            focus: 'border-emerald-500 ring-emerald-500/90',
+            focus: 'border-emerald-500 ring-emerald-500/20',
+            keyboardFocus: 'focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500',
             optionSelected: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300',
             icon: 'text-emerald-500',
             iconSelected: 'text-emerald-500'
         },
         rose: {
-            focus: 'border-rose-500 ring-rose-500/70',
+            focus: 'border-rose-500 ring-rose-500/20',
+            keyboardFocus: 'focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500',
             optionSelected: 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300',
             icon: 'text-rose-500',
             iconSelected: 'text-rose-500'
         },
         amber: {
-            focus: 'border-amber-500 ring-amber-500/90',
+            focus: 'border-amber-500 ring-amber-500/20',
+            keyboardFocus: 'focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500',
             optionSelected: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
             icon: 'text-amber-500',
             iconSelected: 'text-amber-500'
         },
         black: {
-            focus: 'border-slate-800 dark:border-slate-200 ring-slate-500/20 dark:ring-slate-500/90',
+            focus: 'border-slate-800 dark:border-slate-200 ring-slate-500/20',
+            keyboardFocus: 'focus:ring-2 focus:ring-slate-500/20 focus:border-slate-800 dark:focus:border-slate-200',
             optionSelected: 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200',
             icon: 'text-slate-800 dark:text-slate-200',
             iconSelected: 'text-slate-800 dark:text-slate-200'
@@ -359,10 +365,10 @@ const Select = forwardRef(({
     // Theme configurations (matching Input component)
     const themeConfig = {
         default: {
-            wrapper: 'border border-slate-200 dark:border-slate-700',
+            wrapper: 'bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700',
             text: 'text-slate-900 dark:text-white',
             placeholder: 'text-slate-400 dark:text-slate-500',
-            focus: 'bg-white dark:bg-slate-950 ring-1',
+            focus: 'bg-white dark:bg-slate-950 ring-2',
             icon: 'text-slate-400 dark:text-slate-500',
             disabled: 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-900',
             dropdown: 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50',
@@ -374,7 +380,7 @@ const Select = forwardRef(({
             wrapper: 'bg-white/60 dark:bg-slate-800/30 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/30 shadow-sm',
             text: 'text-slate-900 dark:text-white',
             placeholder: 'text-slate-400 dark:text-slate-400/50',
-            focus: 'bg-white/80 dark:bg-slate-800/40 ring-1',
+            focus: 'bg-white/80 dark:bg-slate-800/40 ring-2',
             icon: 'text-slate-400 dark:text-slate-400/70',
             disabled: 'opacity-40 cursor-not-allowed',
             dropdown: 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/30 shadow-xl',
@@ -410,7 +416,7 @@ const Select = forwardRef(({
             wrapper: 'bg-slate-100 dark:bg-slate-800 border-2 border-transparent',
             text: 'text-slate-900 dark:text-white',
             placeholder: 'text-slate-500 dark:text-slate-400',
-            focus: 'bg-white dark:bg-slate-700 ring-1',
+            focus: 'bg-white dark:bg-slate-700 ring-2',
             icon: 'text-slate-500 dark:text-slate-400',
             disabled: 'opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-900',
             dropdown: 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl',
@@ -532,6 +538,7 @@ const Select = forwardRef(({
                     ${isOpen ? `${currentTheme.focus} ${colors.focus}` : ''}
                     ${disabled ? currentTheme.disabled : ''}
                     ${animate ? currentFocusEffect : ''}
+                    ${colors.keyboardFocus}
                     ${className}
                     outline-none
                 `}

@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback, forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import { getColor, formatNumber, ChartTooltip, ChartLegend, ChartCrosshair, multiColors } from './ChartUtils';
+import { getColor, formatNumber, ChartTooltip, ChartLegend, ChartCrosshair, multiColors, useChartResize, useChartMount, CSS_EASE } from './ChartUtils';
 
 /**
  * AreaChart Component
@@ -39,6 +39,7 @@ const AreaChart = forwardRef(({
   // Dimensions
   width = 400,
   height = 300,
+  responsive = false,
 
   // Axes
   showXAxis = true,
@@ -63,32 +64,22 @@ const AreaChart = forwardRef(({
   ...props
 }, ref) => {
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: null });
-  const [animationProgress, setAnimationProgress] = useState(animate ? 0 : 1);
   const [crosshair, setCrosshair] = useState({ visible: false, x: 0, index: -1, points: [] });
   const [hiddenSeries, setHiddenSeries] = useState(new Set());
   const containerRef = useRef(null);
+  const mounted = useChartMount(animate);
+  const [resizeRef, chartW, chartH] = useChartResize(responsive, width, height, 400, 300);
+  const widthToUse = chartW;
+  const heightToUse = chartH;
 
-  // Unique ID for this component instance to prevent gradient ID conflicts
+  // Unique ID for this component instance to prevent gradient/clip ID conflicts
   const uniqueId = useRef(`area-${Math.random().toString(36).substr(2, 9)}`).current;
-
-  useEffect(() => {
-    if (animate) {
-      let start;
-      const duration = 800;
-      const step = (timestamp) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / duration, 1);
-        setAnimationProgress(progress);
-        if (progress < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }
-  }, [animate, data]);
+  const clipId = `${uniqueId}-clip`;
 
   // Add top padding to prevent labels and line from being clipped
   const topPadding = 15;
-  const chartWidth = width - (showYAxis ? yAxisWidth : 0);
-  const chartHeight = height - (showXAxis ? xAxisHeight : 0) - topPadding;
+  const chartWidth = widthToUse - (showYAxis ? yAxisWidth : 0);
+  const chartHeight = heightToUse - (showXAxis ? xAxisHeight : 0) - topPadding;
   const chartX = showYAxis ? yAxisWidth : 0;
   const chartY = topPadding;
 
@@ -123,40 +114,35 @@ const AreaChart = forwardRef(({
   const generateLinePath = (points, smooth = variant === 'curved') => {
     if (points.length < 2) return '';
 
-    const visiblePoints = points.slice(0, Math.ceil(points.length * animationProgress) || 1);
-
     if (variant === 'stepped') {
-      let path = `M ${visiblePoints[0].x} ${visiblePoints[0].y}`;
-      for (let i = 1; i < visiblePoints.length; i++) {
-        const curr = visiblePoints[i];
+      let path = `M ${points[0].x} ${points[0].y}`;
+      for (let i = 1; i < points.length; i++) {
+        const curr = points[i];
         path += ` H ${curr.x} V ${curr.y}`;
       }
       return path;
     }
 
     if (!smooth) {
-      return visiblePoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
     }
 
     // Monotone cubic spline interpolation for smooth, natural curves
-    // Similar to D3's curveMonotoneX - preserves monotonicity and doesn't overshoot
-    if (visiblePoints.length < 2) return '';
-    if (visiblePoints.length === 2) {
-      return `M ${visiblePoints[0].x} ${visiblePoints[0].y} L ${visiblePoints[1].x} ${visiblePoints[1].y}`;
+    if (points.length === 2) {
+      return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
     }
 
-    // Calculate tangents using finite differences (monotone variant)
-    const n = visiblePoints.length;
+    const n = points.length;
     const tangents = [];
 
     for (let i = 0; i < n; i++) {
       if (i === 0) {
-        tangents.push((visiblePoints[1].y - visiblePoints[0].y) / (visiblePoints[1].x - visiblePoints[0].x));
+        tangents.push((points[1].y - points[0].y) / (points[1].x - points[0].x));
       } else if (i === n - 1) {
-        tangents.push((visiblePoints[n - 1].y - visiblePoints[n - 2].y) / (visiblePoints[n - 1].x - visiblePoints[n - 2].x));
+        tangents.push((points[n - 1].y - points[n - 2].y) / (points[n - 1].x - points[n - 2].x));
       } else {
-        const slopeLeft = (visiblePoints[i].y - visiblePoints[i - 1].y) / (visiblePoints[i].x - visiblePoints[i - 1].x);
-        const slopeRight = (visiblePoints[i + 1].y - visiblePoints[i].y) / (visiblePoints[i + 1].x - visiblePoints[i].x);
+        const slopeLeft = (points[i].y - points[i - 1].y) / (points[i].x - points[i - 1].x);
+        const slopeRight = (points[i + 1].y - points[i].y) / (points[i + 1].x - points[i].x);
 
         if (slopeLeft * slopeRight <= 0) {
           tangents.push(0);
@@ -166,12 +152,11 @@ const AreaChart = forwardRef(({
       }
     }
 
-    // Generate cubic bezier path
-    let path = `M ${visiblePoints[0].x} ${visiblePoints[0].y}`;
+    let path = `M ${points[0].x} ${points[0].y}`;
 
     for (let i = 0; i < n - 1; i++) {
-      const p0 = visiblePoints[i];
-      const p1 = visiblePoints[i + 1];
+      const p0 = points[i];
+      const p1 = points[i + 1];
       const dx = (p1.x - p0.x) / 3;
 
       const cp1x = p0.x + dx;
@@ -190,13 +175,11 @@ const AreaChart = forwardRef(({
     const linePath = generateLinePath(points);
     if (!linePath) return '';
 
-    const visiblePoints = points.slice(0, Math.ceil(points.length * animationProgress) || 1);
-    const lastPoint = visiblePoints[visiblePoints.length - 1];
-    const firstPoint = visiblePoints[0];
+    const lastPoint = points[points.length - 1];
+    const firstPoint = points[0];
 
     if (basePoints && variant === 'stacked') {
-      const visibleBase = basePoints.slice(0, Math.ceil(basePoints.length * animationProgress) || 1);
-      const reversedBase = [...visibleBase].reverse();
+      const reversedBase = [...basePoints].reverse();
 
       // Calculate base Y coordinates
       const baseYPoints = reversedBase.map(curr => ({
@@ -384,7 +367,7 @@ const AreaChart = forwardRef(({
               <line
                 x1={chartX}
                 y1={chartY + chartHeight - ((tick - minValue) / valueRange) * chartHeight}
-                x2={width}
+                x2={widthToUse}
                 y2={chartY + chartHeight - ((tick - minValue) / valueRange) * chartHeight}
                 className="stroke-slate-200 dark:stroke-slate-700"
                 strokeDasharray="4,4"
@@ -427,7 +410,7 @@ const AreaChart = forwardRef(({
         {xAxisLabel && (
           <text
             x={chartX + chartWidth / 2}
-            y={height - 2}
+            y={heightToUse - 2}
             textAnchor="middle"
             className="text-[11px] fill-slate-600 dark:fill-slate-400 font-medium"
           >
@@ -460,10 +443,16 @@ const AreaChart = forwardRef(({
   const gradientId = `${uniqueId}-gradient`;
   const isLegendSide = legendPosition === 'left' || legendPosition === 'right';
 
+  const wrapperRef = (el) => {
+    containerRef.current = el;
+    if (resizeRef) resizeRef.current = el;
+  };
+
   return (
     <div
-      ref={containerRef}
-      className={`relative ${isLegendSide && shouldShowLegend ? 'flex items-center' : ''} ${className}`}
+      ref={wrapperRef}
+      className={`relative ${responsive ? 'w-full' : ''} ${isLegendSide && shouldShowLegend ? 'flex items-center' : ''} ${className}`}
+      style={responsive ? { minHeight: heightToUse } : undefined}
       {...props}
     >
       {shouldShowLegend && legendPosition === 'top' && (
@@ -473,9 +462,9 @@ const AreaChart = forwardRef(({
         <ChartLegend items={legendItems} position="left" align={legendAlign} shape={legendShape} interactive={legendInteractive} onToggle={handleLegendToggle} layout="vertical" />
       )}
       <div className="relative">
-        <svg ref={ref} width={width} height={height} className="overflow-visible">
-          {/* Gradient definitions */}
+        <svg ref={ref} width={widthToUse} height={heightToUse} viewBox={`0 0 ${widthToUse} ${heightToUse}`} style={{ maxWidth: '100%', height: 'auto' }} className="overflow-visible">
           <defs>
+            {/* Gradient definitions */}
             {variant === 'gradient' ? (
               <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor={getColor(color, 0)} stopOpacity={0.6} />
@@ -489,52 +478,70 @@ const AreaChart = forwardRef(({
                 </linearGradient>
               ))
             )}
+            {/* Clip path for smooth left-to-right reveal animation */}
+            {animate && (
+              <clipPath id={clipId}>
+                <rect
+                  x={chartX}
+                  y={0}
+                  width={chartWidth}
+                  height={heightToUse}
+                  style={{
+                    transform: mounted ? 'scaleX(1)' : 'scaleX(0)',
+                    transformOrigin: `${chartX}px 0`,
+                    transition: `transform 1s ${CSS_EASE}`,
+                  }}
+                />
+              </clipPath>
+            )}
           </defs>
 
           {renderYAxis()}
           {renderXAxis()}
           {renderAxisLabels()}
 
-          {/* Render areas */}
-          {(isStacked ? [...allPoints].reverse() : allPoints).filter(ap => !ap.hidden).map(({ key, points, index }) => {
-            const areaColor = getAreaColor(index);
-            const prevPoints = isStacked && index > 0 ? allPoints[index - 1].points : null;
+          {/* Render areas with clip-path animation */}
+          <g clipPath={animate ? `url(#${clipId})` : undefined}>
+            {(isStacked ? [...allPoints].reverse() : allPoints).filter(ap => !ap.hidden).map(({ key, points, index }) => {
+              const areaColor = getAreaColor(index);
+              const prevPoints = isStacked && index > 0 ? allPoints[index - 1].points : null;
 
-            return (
-              <g key={key}>
-                <path
-                  d={generateAreaPath(points, prevPoints)}
-                  fill={variant === 'gradient' ? `url(#${gradientId})` : `url(#${uniqueId}-${index})`}
-                  className="transition-all duration-300"
-                />
-
-                {showLine && (
+              return (
+                <g key={key}>
                   <path
-                    d={generateLinePath(points)}
-                    fill="none"
-                    stroke={areaColor}
-                    strokeWidth={strokeWidth}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    d={generateAreaPath(points, prevPoints)}
+                    fill={variant === 'gradient' ? `url(#${gradientId})` : `url(#${uniqueId}-${index})`}
                     className="transition-all duration-300"
                   />
-                )}
 
-                {showDots && !crosshair.visible && points.slice(0, Math.ceil(points.length * animationProgress)).map((point, i) => (
-                  <circle
-                    key={i}
-                    cx={point.x}
-                    cy={point.y}
-                    r={dotSize}
-                    fill="white"
-                    stroke={areaColor}
-                    strokeWidth={2}
-                    className="transition-all duration-200"
-                  />
-                ))}
-              </g>
-            );
-          })}
+                  {showLine && (
+                    <path
+                      d={generateLinePath(points)}
+                      fill="none"
+                      stroke={areaColor}
+                      strokeWidth={strokeWidth}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-all duration-300"
+                    />
+                  )}
+
+                  {showDots && !crosshair.visible && points.map((point, i) => (
+                    <circle
+                      key={i}
+                      cx={point.x}
+                      cy={point.y}
+                      r={dotSize}
+                      fill="white"
+                      stroke={areaColor}
+                      strokeWidth={2}
+                      className="transition-all duration-200"
+                    />
+                  ))}
+                </g>
+              );
+            })}
+          </g>
 
           {/* Crosshair snap overlay */}
           <ChartCrosshair
@@ -587,6 +594,7 @@ AreaChart.propTypes = {
   fillOpacity: PropTypes.number,
   width: PropTypes.number,
   height: PropTypes.number,
+  responsive: PropTypes.bool,
   showXAxis: PropTypes.bool,
   showYAxis: PropTypes.bool,
   yAxisWidth: PropTypes.number,

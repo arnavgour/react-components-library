@@ -180,7 +180,7 @@ const DateTimePicker = ({
     size = 'md',
     variant = 'outlined', // outlined, filled
     className = '',
-    fullWidth = false,
+    fullWidth = true,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [dropUp, setDropUp] = useState(false);
@@ -301,7 +301,7 @@ const DateTimePicker = ({
     }, [isOpen, type]); // Only run on open/close and type change
 
     // Color configs
-    const colors = {
+    const colorsMap = {
         violet: {
             active: 'bg-violet-500 text-white',
             hover: 'hover:bg-violet-50 dark:hover:bg-violet-900/30 text-slate-700 dark:text-slate-300',
@@ -309,6 +309,7 @@ const DateTimePicker = ({
             today: 'text-violet-600 font-bold',
             ring: 'focus:ring-violet-500/20',
             border: 'focus:border-violet-500',
+            borderOpen: 'border-violet-500',
             icon: 'text-violet-500'
         },
         blue: {
@@ -318,6 +319,7 @@ const DateTimePicker = ({
             today: 'text-blue-600 font-bold',
             ring: 'focus:ring-blue-500/20',
             border: 'focus:border-blue-500',
+            borderOpen: 'border-blue-500',
             icon: 'text-blue-500'
         },
         emerald: {
@@ -327,6 +329,7 @@ const DateTimePicker = ({
             today: 'text-emerald-600 font-bold',
             ring: 'focus:ring-emerald-500/20',
             border: 'focus:border-emerald-500',
+            borderOpen: 'border-emerald-500',
             icon: 'text-emerald-500'
         },
         rose: {
@@ -336,6 +339,7 @@ const DateTimePicker = ({
             today: 'text-rose-600 font-bold',
             ring: 'focus:ring-rose-500/20',
             border: 'focus:border-rose-500',
+            borderOpen: 'border-rose-500',
             icon: 'text-rose-500'
         },
         amber: {
@@ -345,6 +349,7 @@ const DateTimePicker = ({
             today: 'text-amber-600 font-bold',
             ring: 'focus:ring-amber-500/20',
             border: 'focus:border-amber-500',
+            borderOpen: 'border-amber-500',
             icon: 'text-amber-500'
         },
         black: {
@@ -354,9 +359,11 @@ const DateTimePicker = ({
             today: 'text-slate-900 dark:text-white font-bold',
             ring: 'focus:ring-slate-500/20',
             border: 'focus:border-slate-900 dark:focus:border-slate-100',
+            borderOpen: 'border-slate-900 dark:border-slate-100',
             icon: 'text-slate-900 dark:text-white'
         },
-    }[color] || colors.violet;
+    };
+    const colors = colorsMap[color] || colorsMap.violet;
 
     // Handlers
     const handleDateClick = (day) => {
@@ -502,9 +509,9 @@ const DateTimePicker = ({
         ${size === 'lg' ? 'h-12 px-5 text-base' : ''}
         ${variant === 'outlined'
             ? 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
-            : 'bg-slate-50 dark:bg-slate-800/50 border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800'
+            : 'bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/70'
         }
-        ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : `${isOpen ? colors.border : ''} focus:ring-4 ${colors.ring}`}
+        ${error ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' : `${isOpen ? colors.borderOpen : ''} focus:ring-2 ${colors.ring}`}
         ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-900' : 'hover:shadow-sm'}
         rounded-xl outline-none
     `;
@@ -513,7 +520,7 @@ const DateTimePicker = ({
         <>
             <style>{scrollbarHideStyles}</style>
             <div
-                className={`relative ${fullWidth ? 'w-full' : 'w-72'} ${className}`}
+                className={`relative ${fullWidth ? 'w-full' : 'w-auto'} ${className}`}
                 ref={containerRef}
             >
                 {/* Label */}
